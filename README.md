@@ -1,54 +1,94 @@
-<p align="center">
-  <a href="https://roots.io/bedrock/">
-    <img alt="Bedrock" src="https://cdn.roots.io/app/uploads/logo-bedrock.svg" height="100">
-  </a>
-</p>
+<p align="center"><strong>My Store</strong></p>
 
-<p align="center">
-  <a href="https://packagist.org/packages/roots/bedrock"><img alt="Packagist Installs" src="https://img.shields.io/packagist/dt/roots/bedrock?label=projects%20created&colorB=2b3072&colorA=525ddc&style=flat-square"></a>
-  <a href="https://packagist.org/packages/roots/wordpress"><img alt="roots/wordpress Packagist Downloads" src="https://img.shields.io/packagist/dt/roots/wordpress?label=roots%2Fwordpress%20downloads&logo=roots&logoColor=white&colorB=2b3072&colorA=525ddc&style=flat-square"></a>
-  <img src="https://img.shields.io/badge/dynamic/json.svg?url=https://raw.githubusercontent.com/roots/bedrock/master/composer.json&label=wordpress&logo=roots&logoColor=white&query=$.require[%22roots/wordpress%22]&colorB=2b3072&colorA=525ddc&style=flat-square">
-  <a href="https://github.com/roots/bedrock/actions/workflows/ci.yml"><img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/roots/bedrock/ci.yml?branch=master&logo=github&label=CI&style=flat-square"></a>
-  <a href="https://twitter.com/rootswp"><img alt="Follow Roots" src="https://img.shields.io/badge/follow%20@rootswp-1da1f2?logo=twitter&logoColor=ffffff&message=&style=flat-square"></a>
-  <a href="https://github.com/sponsors/roots"><img src="https://img.shields.io/badge/sponsor%20roots-525ddc?logo=github&style=flat-square&logoColor=ffffff&message=" alt="Sponsor Roots"></a>
-</p>
+<p align="center">A shopper picks products, checks out with an address and card, and gets their order shipped.</p>
 
-<p align="center">WordPress boilerplate with Composer, easier configuration, and an improved folder structure</p>
+## Screenshots
 
-<p align="center">
-  <a href="https://roots.io/bedrock/">Website</a> &nbsp;&nbsp; <a href="https://roots.io/bedrock/docs/installation/">Documentation</a> &nbsp;&nbsp; <a href="https://github.com/roots/bedrock/releases">Releases</a> &nbsp;&nbsp; <a href="https://discourse.roots.io/">Community</a>
-</p>
+The shopper flow described in [docs/PLAN.md](docs/PLAN.md): browse the catalog, view a product, review the cart, then check out.
 
-## Support us
+| Catalog | Product detail |
+|---|---|
+| ![Catalog](docs/screenshots/01-catalog.png) | ![Product detail](docs/screenshots/02-product-detail.png) |
 
-Roots is an independent open source org, supported only by developers like you. Your sponsorship funds [WP Packages](https://wp-packages.org/) and the entire Roots ecosystem, and keeps them independent. Support us by purchasing [Radicle](https://roots.io/radicle/) or [sponsoring us on GitHub](https://github.com/sponsors/roots) — sponsors get access to our private Discord.
-
-### Sponsors
-
-<a href="https://carrot.com/"><img src="https://cdn.roots.io/app/uploads/carrot.svg" alt="Carrot" height="90"></a> <a href="https://wordpress.com/"><img src="https://cdn.roots.io/app/uploads/wordpress.svg" alt="WordPress.com" height="90"></a> <a href="https://www.itineris.co.uk/"><img src="https://cdn.roots.io/app/uploads/itineris.svg" alt="Itineris" height="90"></a> <a href="https://kinsta.com/?kaid=OFDHAJIXUDIV"><img src="https://cdn.roots.io/app/uploads/kinsta.svg" alt="Kinsta" height="90"></a>
+| Cart | Order confirmation |
+|---|---|
+| ![Cart](docs/screenshots/03-cart.png) | ![Order confirmation](docs/screenshots/04-order-confirmation.png) |
 
 ## Overview
 
-Bedrock is a WordPress boilerplate for developers that want to manage their projects with Git and Composer. Much of the philosophy behind Bedrock is inspired by the [Twelve-Factor App](http://12factor.net/) methodology, including the [WordPress specific version](https://roots.io/twelve-factor-wordpress/).
+An ecommerce storefront built as a decoupled AngularJS app embedded inside a WordPress + WooCommerce backend, rather than a stock WooCommerce/theme install. It's a portfolio/learning project — the full plan, scope decisions, and the reasoning behind each one live in [docs/PLAN.md](docs/PLAN.md).
 
-- Better folder structure
-- Dependency management with [Composer](https://getcomposer.org)
-  - [`roots/wordpress`](https://wp-packages.org/wordpress-core) package for WordPress core
-  - [WP Packages](https://wp-packages.org/) repository for WordPress plugins and themes
-- Easy WordPress configuration with environment specific files
-- Environment variables with [Dotenv](https://github.com/vlucas/phpdotenv)
-- Autoloader for mu-plugins (use regular plugins as mu-plugins)
+## Stack
 
-## Getting Started
+- **Backend** — WordPress via [Bedrock](https://roots.io/bedrock/) (Composer-managed, env-based config) + WooCommerce. The frontend talks only to WooCommerce's public Store API (`/wc/store/v1/...`) — never the admin REST API, which needs a Consumer Key/Secret and has no business being called from the browser.
+- **Theme** — [TailPress](https://tailpress.io/) (`web/app/themes/tailpress`), a plain Underscores-style WP theme with Tailwind, chosen over Sage for having fewer moving parts to wire AngularJS into.
+- **Frontend** — AngularJS 1.x, built via Vite and enqueued as the theme's own JS/CSS bundle (same origin, no CORS, no separately hosted SPA).
+- **Payments** — Stripe (client-side Elements/Payment Element only — the server never sees a raw card number).
+- **Tests** — [Pest](https://pestphp.com/) for feature tests, [Pint](https://laravel.com/docs/pint) for style.
 
-See the [Bedrock installation documentation](https://roots.io/bedrock/docs/installation/).
+### Why these choices
 
-## Community
+- **Embedded Angular over default WooCommerce templates** — the point of this project is the decoupled-frontend engineering, not a theme-and-plugins install. Every module calls the Store API directly instead of falling back to server-rendered WooCommerce markup.
+- **AngularJS despite being EOL** (no security patches since Jan 2022) — a deliberate choice, kept because it's the framework being demonstrated here, not because it's the "right" pick for a new project today.
+- **Hybrid/embedded, not fully headless** — WordPress still renders the page shell; Angular only takes over the storefront regions. That avoids standing up a second server, auth layer, and CORS config for no benefit at this scope.
 
-Keep track of development and community news.
+## Architecture
 
-- Join us on Discord by [sponsoring us on GitHub](https://github.com/sponsors/roots)
-- Join us on [Roots Discourse](https://discourse.roots.io/)
-- Follow [@rootswp on Twitter](https://twitter.com/rootswp)
-- Follow the [Roots Blog](https://roots.io/blog/)
-- Subscribe to the [Roots Newsletter](https://roots.io/subscribe/)
+```
+Browser
+  └─ TailPress theme (WP-rendered shell)
+       └─ AngularJS app (theme's own JS/CSS bundle)
+            ├─ Catalog / Product / Cart / Checkout controllers
+            ├─ Repositories → WooCommerce Store API (/wc/store/v1/...)
+            └─ Stripe Elements → Stripe (card capture, never touches WP server)
+```
+
+## Core flow
+
+Each module is a step of the one shopper story — catalog → product detail → cart → checkout → confirmation — and each is independently demoable. Full module breakdown, cut features, and the reasoning behind each is in [docs/PLAN.md](docs/PLAN.md).
+
+| # | Module | What it does |
+|---|--------|--------------|
+| 1 | Catalog | Lists products (image, name, price) |
+| 2 | Product detail | Shows one product, add to cart |
+| 3 | Cart | View items, change qty, remove, see total |
+| 4 | Checkout | Shipping address, optional login/account creation, Stripe card field |
+| 5 | Order confirmation | Shows what was ordered and that it's paid |
+
+## Getting started
+
+Prerequisites: PHP >= 8.3, [Composer](https://getcomposer.org), [pnpm](https://pnpm.io), MySQL, OpenSSL.
+
+```sh
+composer install
+./bin/setup.sh
+```
+
+`bin/setup.sh` creates the database and app DB user, writes `.env`, runs the WordPress install via WP-CLI, builds and activates the TailPress theme, activates WooCommerce, and seeds demo products/shipping — a full clone-to-running-site setup with no manual browser install step. It's safe to re-run.
+
+To work on the theme/frontend directly:
+
+```sh
+cd web/app/themes/tailpress
+pnpm install
+pnpm run dev   # or: pnpm run build
+```
+
+## Testing
+
+```sh
+composer test       # Pest feature tests
+composer lint        # Pint, check only
+composer lint:fix    # Pint, auto-fix
+```
+
+## Project layout
+
+- `docs/PLAN.md` — the full plan: scope decisions, stack rationale, module breakdown, engineering guardrails.
+- `web/app/themes/tailpress` — the theme + embedded AngularJS app (`resources/js/controllers`, `resources/js/services`).
+- `bin/setup.sh` — clone-to-running-site setup script.
+- `tests/Feature` — Pest feature tests.
+
+---
+
+Built on [Bedrock](https://roots.io/bedrock/) and [TailPress](https://tailpress.io/), with [WooCommerce](https://woocommerce.com/) as the commerce backend.

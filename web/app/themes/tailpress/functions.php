@@ -78,6 +78,7 @@ function tailpress(): TailPress\Framework\Theme
                 ->registerAsset('resources/js/controllers/catalog-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-product-repository', 'tailpress-price-formatter'])
                 ->registerAsset('resources/js/controllers/product-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-product-repository', 'tailpress-cart-repository', 'tailpress-price-formatter'])
                 ->registerAsset('resources/js/controllers/cart-badge-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-cart-repository'])
+                ->registerAsset('resources/js/controllers/cart-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-cart-repository', 'tailpress-price-formatter'])
                 ->editorStyleFile('resources/css/editor-style.css')
             )
             ->enqueueAssets()

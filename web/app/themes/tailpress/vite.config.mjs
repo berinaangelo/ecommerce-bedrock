@@ -26,6 +26,7 @@ export default defineConfig(({ command }) => {
                     'resources/js/controllers/catalog-controller.js',
                     'resources/js/controllers/product-controller.js',
                     'resources/js/controllers/cart-badge-controller.js',
+                    'resources/js/controllers/cart-controller.js',
                     'resources/css/app.css',
                     'resources/css/editor-style.css'
                 ],

@@ -67,6 +67,33 @@ This is a portfolio/learning project — "unique" doesn't mean extra shopper-fac
 
 **Cut:** Docker/CI/microservices theater, extra shopper-facing features for "wow factor," rewriting in a trendier framework just to look modern.
 
+## Engineering guidelines
+
+Ties into "Portfolio differentiators" above — the code itself is part of what's being demonstrated, not just the working flow. Applies to both the PHP (theme/WooCommerce integration) and the AngularJS side as the 5 modules get built:
+
+- **OOP over procedural WP-style spaghetti** — classes with clear single responsibilities (e.g. a `CartService`, `CheckoutService`, `StripePaymentGateway`) instead of loose functions in `functions.php`.
+- **Reach for a design pattern where it solves a real problem the code already has** — e.g. Strategy for swappable behavior (payment gateway could be a `PaymentStrategy` interface even with only Stripe implementing it today), Builder for assembling multi-step objects (e.g. an order/checkout payload built up across the checkout form's steps), Repository for isolating WC REST/Store API calls from the Angular controllers/components that use them.
+- **Guardrail**: a pattern must earn its place the same way a module does — if it's there because "it's good practice" rather than because the code without it is genuinely harder to read or change, it's over-engineering and fails the plan's own "why does this exist" gate. Simple code stays simple; patterns show up where real complexity (swappable strategies, multi-step construction, decoupling from an external API) already exists.
+
+### Payment & external-API guardrails
+
+Constraints on how Cart and Checkout (modules 3–4) get built — not new scope, but non-negotiable given real money is involved:
+
+- **Stripe key split, enforced not just assumed**: the publishable key is the *only* Stripe key that may ever appear in the Angular bundle/theme JS. The secret key lives in `.env` server-side only, used exclusively by PHP. Concrete, project-specific application of the standing "never expose sensitive keys" rule.
+- **Raw card data never touches the WP server** — use Stripe's client-side Elements/Payment Element for card capture, so the server only ever sees a token/payment intent ID, never a card number. Keeps the project out of PCI-DSS scope entirely, not just "more secure."
+- **External calls (WC REST/Store API, Stripe) fail without corrupting state** — a timed-out or failed call must never leave the cart half-updated or silently retry into a double charge. Project-specific application of the standing "always generate with a fallback" rule.
+- **Checkout is idempotent** — guard against a double-click or retried request creating two orders/two charges for the same cart (disable-on-submit, plus checking for an existing pending order before creating a new one).
+
+### Readability checklist ("grandma test" for code)
+
+This isn't something `composer lint` can check mechanically — Pint stays in place in `composer.json` (`pint --test` / `pint`) for what it's actually good at: enforcing consistent style. This checklist is a separate, manual pass applied during self-review/PR, on top of Pint, not instead of it:
+
+- Could someone unfamiliar with this codebase read the function/class and understand what it does without asking you first? If not, it needs a rename, a split, or a comment explaining *why* (not *what*).
+- Names are descriptive, not abbreviated or clever (`$cartTotal`, not `$ct`; `CalculateShippingCost()`, not a one-liner buried in a ternary).
+- No unexplained magic numbers/strings — pull them into a named constant if their meaning isn't obvious from context.
+- Each function/method does one thing — if you need "and" to describe what it does, split it.
+- No loop nesting 3+ deep (already a standing rule) — flatten with early returns/helpers/collection methods instead.
+
 ## Next steps
 
 1. Resolve the open account/login question above.

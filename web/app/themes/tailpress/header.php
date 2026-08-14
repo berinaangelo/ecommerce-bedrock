@@ -17,20 +17,16 @@
 <body <?php body_class('antialiased'); ?>>
 <?php do_action('tailpress_site_before'); ?>
 
-<div id="page" class="min-h-screen flex flex-col">
+<div id="page" class="min-h-screen flex flex-col" ng-app="ecommerceApp">
     <?php do_action('tailpress_header'); ?>
 
     <nav class="nav">
         <div class="wrap nav-inner">
             <a class="wordmark" href="<?php echo esc_url(home_url('/')); ?>"><?php bloginfo('name'); ?></a>
-            <div class="nav-right">
-                <?php // Cart count isn't wired up yet — that's Module 3 (Cart). The badge only renders once there's a real count to show.?>
-                <?php $cart_count = 0; ?>
-                <a class="icon-btn" href="<?php echo esc_url(home_url('/cart/')); ?>" aria-label="<?php echo $cart_count > 0 ? esc_attr(sprintf(__('Cart, %d items', 'tailpress'), $cart_count)) : esc_attr__('View cart', 'tailpress'); ?>">
+            <div class="nav-right" ng-controller="CartBadgeController as navVm">
+                <a class="icon-btn" href="<?php echo esc_url(home_url('/cart/')); ?>" ng-attr-aria-label="{{ navVm.count > 0 ? ('Cart, ' + navVm.count + ' items') : 'View cart' }}">
                     <svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L21.6 8H6"/><circle cx="9.5" cy="20.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="17.5" cy="20.5" r="1.4" fill="currentColor" stroke="none"/></svg>
-                    <?php if ($cart_count > 0): ?>
-                        <span class="cart-badge"><?php echo esc_html($cart_count); ?></span>
-                    <?php endif; ?>
+                    <span class="cart-badge" ng-if="navVm.count > 0">{{ navVm.count }}</span>
                 </a>
             </div>
         </div>
@@ -64,4 +60,4 @@
         <?php endif; ?>
 
         <?php do_action('tailpress_content_start'); ?>
-        <main ng-app="ecommerceApp">
+        <main>

@@ -20,4 +20,47 @@ angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonc
             }
         );
     };
+
+    // Module 3: Cart. Read-only — no Nonce header needed (only writes require
+    // one), same shape/fallback as every other repository call.
+    this.getCart = function () {
+        return $http.get(window.ecommerceStoreApi.cartUrl).then(
+            function (response) {
+                return { cart: response.data, failed: false };
+            },
+            function () {
+                return { cart: null, failed: true };
+            }
+        );
+    };
+
+    this.updateItem = function (key, quantity) {
+        return $http.post(
+            window.ecommerceStoreApi.cartUpdateItemUrl,
+            { key: key, quantity: quantity },
+            { headers: { 'Nonce': StoreApiNonce.current } }
+        ).then(
+            function (response) {
+                return { cart: response.data, failed: false };
+            },
+            function () {
+                return { cart: null, failed: true };
+            }
+        );
+    };
+
+    this.removeItem = function (key) {
+        return $http.post(
+            window.ecommerceStoreApi.cartRemoveItemUrl,
+            { key: key },
+            { headers: { 'Nonce': StoreApiNonce.current } }
+        ).then(
+            function (response) {
+                return { cart: response.data, failed: false };
+            },
+            function () {
+                return { cart: null, failed: true };
+            }
+        );
+    };
 }]);

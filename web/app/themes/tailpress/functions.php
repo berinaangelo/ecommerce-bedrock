@@ -54,6 +54,8 @@ add_action('wp_enqueue_scripts', function () {
         'productsUrl' => rest_url('wc/store/v1/products'),
         'cartUrl' => rest_url('wc/store/v1/cart'),
         'cartAddItemUrl' => rest_url('wc/store/v1/cart/add-item'),
+        'cartUpdateItemUrl' => rest_url('wc/store/v1/cart/update-item'),
+        'cartRemoveItemUrl' => rest_url('wc/store/v1/cart/remove-item'),
         // Module 2: Product detail. Only set on a single-product page — the
         // id Angular fetches, since there's no client-side router to derive
         // it from the URL (see single-product.php).
@@ -75,6 +77,7 @@ function tailpress(): TailPress\Framework\Theme
                 ->registerAsset('resources/js/services/cart-repository.js', ['angularjs', 'tailpress-angular-app', 'tailpress-store-api-nonce'])
                 ->registerAsset('resources/js/controllers/catalog-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-product-repository', 'tailpress-price-formatter'])
                 ->registerAsset('resources/js/controllers/product-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-product-repository', 'tailpress-cart-repository', 'tailpress-price-formatter'])
+                ->registerAsset('resources/js/controllers/cart-badge-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-cart-repository'])
                 ->editorStyleFile('resources/css/editor-style.css')
             )
             ->enqueueAssets()

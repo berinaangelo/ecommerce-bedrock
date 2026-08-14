@@ -28,6 +28,7 @@ get_header();
 
     <div class="grid" ng-if="!vm.loading && !vm.failed && vm.products.length">
         <article class="card" ng-repeat="product in vm.products" ng-class="{'is-soldout': !product.is_in_stock}">
+            <a class="card-link" ng-href="{{ product.permalink }}" aria-label="{{ 'View ' + product.name }}"></a>
             <span class="badge-sale" ng-if="product.on_sale"><?php esc_html_e('Sale', 'tailpress'); ?></span>
             <span class="badge-stock" ng-if="!product.is_in_stock"><?php esc_html_e('Sold out', 'tailpress'); ?></span>
 
@@ -41,8 +42,9 @@ get_header();
                         <span class="card-name">{{ product.name }}</span>
                         <span class="card-cat" ng-if="product.categories.length">{{ product.categories[0].name }}</span>
                     </div>
-                    <!-- Decorative for now — Module 2 (Product detail) wires this up as the
-                         click-through to a single-product view. -->
+                    <!-- Module 2: Product detail. The click-through itself is
+                         .card-link above (whole-card hit target, matching
+                         docs/mockups/index.html); this arrow stays decorative. -->
                     <span class="card-arrow"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
                 </div>
                 <div class="price-row">

@@ -21,7 +21,10 @@ export default defineConfig(({ command }) => {
                     'resources/js/angular-app.js',
                     'resources/js/services/product-repository.js',
                     'resources/js/services/price-formatter.js',
+                    'resources/js/services/store-api-nonce.js',
+                    'resources/js/services/cart-repository.js',
                     'resources/js/controllers/catalog-controller.js',
+                    'resources/js/controllers/product-controller.js',
                     'resources/css/app.css',
                     'resources/css/editor-style.css'
                 ],

@@ -108,7 +108,13 @@ This isn't something `composer lint` can check mechanically — Pint stays in pl
      - [x] 1.3 Price formatting helper (`prices.price` is a minor-unit string, not display-ready — reused by modules 2–4 later).
      - [x] 1.4 `CatalogController` + grid view (matching `docs/mockups/index.html`), with explicit loading/empty/error states.
      - [x] 1.5 Wire into `page-shop.php` + end-to-end verification against seeded data.
-   - **Module 2: Product detail** — not yet broken down.
+   - **Module 2: Product detail** — done. Themed single-product page matching `docs/mockups/product.html`: image, name, price (sale/out-of-stock states), description, quantity stepper, working Add to Cart. Replaces WooCommerce's unstyled fallback markup that rendered before this (the theme has no `add_theme_support('woocommerce')`, so WP fell through to `single.php`'s blog-post chrome).
+     - Routing: a theme-level `single-product.php` — WP's own template-hierarchy name for the `product` CPT, not a `page-{slug}.php` like Module 1's Shop page, since no WP Page exists per product. The product id is localized directly per-page (`ecommerceStoreApi.productId`) rather than parsed from the URL, since the app has no client-side router.
+     - `ProductRepository.getById(id)` added alongside `getAll()`, same shape/fallback convention.
+     - New `CartRepository` (`POST /wc/store/v1/cart/add-item`) — the app's first Store API *write*. Writes need a `Nonce` header, which (confirmed against the plugin source) only cart routes return on their response — a plain `GET /products/{id}` never sets it. `store-api-nonce.js` primes it with a `GET /wc/store/v1/cart` on Angular bootstrap (same approach the official WC Blocks client uses) and an `$http` interceptor keeps it fresh from later cart-route responses; `CartRepository` reads it when POSTing. Built now since Modules 3–4 (cart updates, checkout) need this same nonce.
+     - Catalog grid's decorative arrow (`page-shop.php`) is now a real click-through: a `.card-link` whole-card overlay anchor to `product.permalink`, matching the mockup's own pattern.
+     - Cut: the mockup's spec-list (Battery/Connectivity/etc.) — no source in the Store API `ProductSchema` and no seeded product meta to back it.
+     - Vite's `rollupOptions.input` in `vite.config.mjs` is a separate, manually-maintained list from `functions.php`'s `registerAsset()` calls — a new JS file needs adding to both, or `pnpm build` silently omits it from `dist/`.
    - **Module 3: Cart** — not yet broken down.
    - **Module 4: Checkout** — not yet broken down.
    - **Module 5: Order confirmation** — not yet broken down.

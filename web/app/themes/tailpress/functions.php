@@ -52,6 +52,12 @@ add_action('wp_enqueue_scripts', function () {
 add_action('wp_enqueue_scripts', function () {
     wp_localize_script('tailpress-product-repository', 'ecommerceStoreApi', [
         'productsUrl' => rest_url('wc/store/v1/products'),
+        'cartUrl' => rest_url('wc/store/v1/cart'),
+        'cartAddItemUrl' => rest_url('wc/store/v1/cart/add-item'),
+        // Module 2: Product detail. Only set on a single-product page — the
+        // id Angular fetches, since there's no client-side router to derive
+        // it from the URL (see single-product.php).
+        'productId' => is_singular('product') ? get_the_ID() : null,
     ]);
 }, 20);
 
@@ -65,13 +71,16 @@ function tailpress(): TailPress\Framework\Theme
                 ->registerAsset('resources/js/angular-app.js', ['angularjs'])
                 ->registerAsset('resources/js/services/product-repository.js', ['angularjs', 'tailpress-angular-app'])
                 ->registerAsset('resources/js/services/price-formatter.js', ['angularjs', 'tailpress-angular-app'])
+                ->registerAsset('resources/js/services/store-api-nonce.js', ['angularjs', 'tailpress-angular-app'])
+                ->registerAsset('resources/js/services/cart-repository.js', ['angularjs', 'tailpress-angular-app', 'tailpress-store-api-nonce'])
                 ->registerAsset('resources/js/controllers/catalog-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-product-repository', 'tailpress-price-formatter'])
+                ->registerAsset('resources/js/controllers/product-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-product-repository', 'tailpress-cart-repository', 'tailpress-price-formatter'])
                 ->editorStyleFile('resources/css/editor-style.css')
             )
             ->enqueueAssets()
         )
         ->features(fn($manager) => $manager->add(TailPress\Framework\Features\MenuOptions::class))
-        ->menus(fn($manager) => $manager->add('primary', __( 'Primary Menu', 'tailpress')))
+        ->menus(fn($manager) => $manager->add('primary', 'Primary Menu'))
         ->themeSupport(fn($manager) => $manager->add([
             'title-tag',
             'custom-logo',

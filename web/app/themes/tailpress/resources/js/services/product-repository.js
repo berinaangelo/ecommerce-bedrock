@@ -18,4 +18,18 @@ angular.module('ecommerceApp').service('ProductRepository', ['$http', function (
             }
         );
     };
+
+    // Module 2: Product detail. `productsUrl` is the collection endpoint
+    // (`/wc/store/v1/products`); appending the id gives the single-product
+    // endpoint — same base, no separate localized URL needed.
+    this.getById = function (id) {
+        return $http.get(window.ecommerceStoreApi.productsUrl + '/' + id).then(
+            function (response) {
+                return { product: response.data, failed: false };
+            },
+            function () {
+                return { product: null, failed: true };
+            }
+        );
+    };
 }]);

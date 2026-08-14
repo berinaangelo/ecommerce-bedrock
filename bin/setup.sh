@@ -62,6 +62,7 @@ confirm() {
 info "Checking prerequisites..."
 require_cmd php
 require_cmd composer
+require_cmd npm
 require_cmd mysql
 require_cmd mysqladmin
 require_cmd openssl
@@ -190,7 +191,23 @@ else
         --skip-email
 fi
 
-# ---------- 10. summary ----------
+# ---------- 10. build & activate theme, activate plugins ----------
+
+if [ -f web/app/themes/tailpress/composer.json ]; then
+    info "Installing TailPress theme dependencies..."
+    composer install --working-dir=web/app/themes/tailpress
+    npm install --prefix web/app/themes/tailpress
+    npm run build --prefix web/app/themes/tailpress
+fi
+
+info "Activating TailPress theme..."
+"$WP_CLI" theme activate tailpress
+
+info "Activating WooCommerce..."
+"$WP_CLI" plugin activate woocommerce
+"$WP_CLI" transient delete _wc_activation_redirect >/dev/null 2>&1 || true
+
+# ---------- 11. summary ----------
 
 echo
 info "Done. Site: ${WP_HOME}  |  Admin: ${WP_HOME}/wp/wp-admin"

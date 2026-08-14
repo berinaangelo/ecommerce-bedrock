@@ -8,7 +8,7 @@ A shopper picks products, checks out with an address and card, and gets their or
 
 ## Stack
 
-- **Backend**: WordPress via [Bedrock](https://roots.io/bedrock/) (Composer-managed, env-based config) + WooCommerce, added to `composer.json`. WooCommerce's REST API (`/wc/v3/...`) and Store API (`/wc/store/v1/...`) are the only backend surface the frontend talks to.
+- **Backend**: WordPress via [Bedrock](https://roots.io/bedrock/) (Composer-managed, env-based config) + WooCommerce, added to `composer.json`. The frontend talks only to the Store API (`/wc/store/v1/...`) — it's public/no-key by design, unlike the admin REST API (`/wc/v3/...`), which needs a Consumer Key/Secret and is never called from the browser. Login/account-creation instead use WordPress's own cookie/nonce auth (same-origin, no CORS), fitting the hybrid architecture rather than adding a separate token/JWT layer.
 - **Theme**: [TailPress](https://tailpress.io/) — plain Underscores-style WP theme with Tailwind CSS/PostCSS, no Blade/Acorn layer. Chosen over Sage (also Roots, pairs with Bedrock) for being lighter — fewer moving parts to wire AngularJS into.
 - **Frontend**: AngularJS 1.x, embedded into the TailPress theme's build (not a separately hosted SPA) — enqueued as the theme's JS/CSS bundle, same-origin, no CORS to manage.
   - Note: AngularJS is EOL (no security patches since Jan 2022). Kept deliberately per explicit choice — see "Portfolio differentiators" below for how that's framed rather than hidden.
@@ -17,7 +17,7 @@ A shopper picks products, checks out with an address and card, and gets their or
 ## Scope decisions (locked in)
 
 - **Products**: physical goods only — checkout needs a shipping address and shipping cost/method.
-- **Accounts**: guest checkout by default, with an optional "create an account with this order" checkbox at checkout. No separate login flow is in scope yet — **open question**: does this also need a way to log into an *existing* account before checkout? Not yet decided.
+- **Accounts**: guest checkout by default, with an optional "create an account with this order" checkbox at checkout. Login for an *existing* account is also supported, but optional — a shopper can always check out as a guest. The trade-off: guest orders don't get real-time purchase history/delivery-status visibility the way an account holder's do (that visibility comes from WooCommerce's own account dashboard, not a custom build — see "Cut" below). Auth mechanism: WordPress cookie/nonce auth (same-origin), not a custom token scheme — see Stack.
 - **Payment**: single processor — Stripe. No payment-method picker.
 - **Catalog**: simple products only, no variants (size/color/etc).
 
@@ -27,10 +27,10 @@ Each module is a step of the one shopper story — nothing runs in parallel to i
 
 | # | Module | What it does | Talks to |
 |---|--------|--------------|----------|
-| 1 | **Catalog** | Lists products (image, name, price) | `GET /wc/v3/products` |
-| 2 | **Product detail** | Shows one product, "Add to cart" | `GET /wc/v3/products/{id}`, add-to-cart |
+| 1 | **Catalog** | Lists products (image, name, price) | WC Store API `GET /wc/store/v1/products` |
+| 2 | **Product detail** | Shows one product, "Add to cart" | WC Store API `GET /wc/store/v1/products/{id}`, add-to-cart |
 | 3 | **Cart** | View items, change qty, remove, see total | WC Store API `/wc/store/v1/cart` |
-| 4 | **Checkout** | Shipping address + optional account-creation checkbox + Stripe card field | WC Store API checkout endpoint + Stripe |
+| 4 | **Checkout** | Shipping address + optional login/account-creation + Stripe card field | WC Store API checkout endpoint + Stripe |
 | 5 | **Order confirmation** | Shows what was ordered and that it's paid | Response from checkout call |
 
 ## Cut (explicitly out, not deferred)
@@ -83,6 +83,7 @@ Constraints on how Cart and Checkout (modules 3–4) get built — not new scope
 - **Raw card data never touches the WP server** — use Stripe's client-side Elements/Payment Element for card capture, so the server only ever sees a token/payment intent ID, never a card number. Keeps the project out of PCI-DSS scope entirely, not just "more secure."
 - **External calls (WC REST/Store API, Stripe) fail without corrupting state** — a timed-out or failed call must never leave the cart half-updated or silently retry into a double charge. Project-specific application of the standing "always generate with a fallback" rule.
 - **Checkout is idempotent** — guard against a double-click or retried request creating two orders/two charges for the same cart (disable-on-submit, plus checking for an existing pending order before creating a new one).
+- **Order finalization doesn't depend on the client staying connected** — a Stripe webhook (`payment_intent.succeeded`) marks the order paid server-side, so a browser tab dying/losing connection after Stripe confirms payment can't leave a charge with no matching WooCommerce order.
 
 ### Readability checklist ("grandma test" for code)
 
@@ -96,8 +97,8 @@ This isn't something `composer lint` can check mechanically — Pint stays in pl
 
 ## Next steps
 
-1. Resolve the open account/login question above.
-2. ~~Scaffold: set up `.env`/DB config.~~ Done — `bin/setup.sh` creates the MySQL database + app user, writes `.env`, and runs the WordPress install via WP-CLI (`wp-cli/wp-cli-bundle`, added as a Composer dev dependency). Run `./bin/setup.sh` from repo root. Still open: pull in TailPress as the active theme, add WooCommerce to `composer.json`.
+1. ~~Resolve the open account/login question above.~~ Done — login for an existing account is supported and optional; guest checkout always remains available.
+2. ~~Scaffold: set up `.env`/DB config; pull in TailPress as the active theme; add WooCommerce to `composer.json`.~~ Done — `bin/setup.sh` creates the MySQL database + app user, writes `.env`, and runs the WordPress install via WP-CLI (`wp-cli/wp-cli-bundle`, added as a Composer dev dependency). WooCommerce (`wp-plugin/woocommerce`, currently 11.0.1) is now a Composer dependency, resolved via the `wp-packages.org` repository already configured in `composer.json`. TailPress was scaffolded via its own installer (`composer global require tailpress/installer`, then `tailpress new`) into `web/app/themes/tailpress/` and committed to git — it isn't a normal Composer dependency of the root project, since its Packagist package is typed `"project"`, not `"wordpress-theme"`. `bin/setup.sh` now also builds the theme's assets and activates both the theme and WooCommerce on every run. Run `./bin/setup.sh` from repo root.
 3. Wire AngularJS into the TailPress build pipeline alongside Tailwind.
 4. Build modules 1–5 in order against the WC REST/Store API.
 5. Add the Pest feature tests and the README case-study section.

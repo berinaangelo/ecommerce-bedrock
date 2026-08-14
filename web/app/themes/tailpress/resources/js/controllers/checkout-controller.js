@@ -31,7 +31,14 @@ angular.module('ecommerceApp').controller('CheckoutController', ['CartRepository
         city: '',
         state: '',
         postcode: '',
-        country: ''
+        // null, not '' — ngOptions only recognizes the literal
+        // <option value=""> in page-checkout.php as the "nothing selected"
+        // placeholder when the model is null/undefined (checked via ==).
+        // An empty string doesn't match any option (including that literal
+        // one), so ngOptions falls back to synthesizing its own blank
+        // unknown-value option instead — which is what selectWoo was
+        // rendering with no visible placeholder text.
+        country: null
     };
 
     vm.submittingAddress = false;

@@ -2,7 +2,19 @@
 // as ProductRepository) — POST /wc/store/v1/cart/add-item, body { id, quantity }.
 // `cartAddItemUrl` is bridged in from PHP via wp_localize_script, same as
 // ecommerceStoreApi.productsUrl.
-angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonce', function ($http, StoreApiNonce) {
+angular.module('ecommerceApp').service('CartRepository', ['$http', '$rootScope', 'StoreApiNonce', function ($http, $rootScope, StoreApiNonce) {
+    // laws-of-ux pass: CartBadgeController (header.php's nav, a sibling
+    // controller with no other link to these calls) only fetched its count
+    // once on its own load — an add/update/remove elsewhere on the page
+    // never reached it, so the badge could sit stale until a full page
+    // reload. Every mutating call already funnels through this repository,
+    // so broadcasting the fresh count from here (rather than each of
+    // ProductController/CartController/CheckoutController re-implementing
+    // the same notification) is the one-place fix.
+    function broadcastCount(count) {
+        $rootScope.$broadcast('cart:changed', count);
+    }
+
     // The Store API's field-validation errors (invalid postcode/state/etc.,
     // from free-text address input) carry the real, specific reason one
     // level deeper than the top-level `message` — that top-level message is
@@ -35,6 +47,7 @@ angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonc
             { headers: { 'Nonce': StoreApiNonce.current } }
         ).then(
             function (response) {
+                broadcastCount(response.data.items_count);
                 return { cart: response.data, failed: false };
             },
             function () {
@@ -63,6 +76,7 @@ angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonc
             { headers: { 'Nonce': StoreApiNonce.current } }
         ).then(
             function (response) {
+                broadcastCount(response.data.items_count);
                 return { cart: response.data, failed: false };
             },
             function () {
@@ -78,6 +92,7 @@ angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonc
             { headers: { 'Nonce': StoreApiNonce.current } }
         ).then(
             function (response) {
+                broadcastCount(response.data.items_count);
                 return { cart: response.data, failed: false };
             },
             function () {
@@ -136,6 +151,10 @@ angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonc
             { headers: { 'Nonce': StoreApiNonce.current } }
         ).then(
             function (response) {
+                // A successful checkout empties the cart server-side; the
+                // checkout response is order data (no items_count field),
+                // so broadcast 0 explicitly rather than reading it off here.
+                broadcastCount(0);
                 return { order: response.data, failed: false };
             },
             function (response) {

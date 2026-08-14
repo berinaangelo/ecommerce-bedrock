@@ -75,6 +75,19 @@ get_header();
             <div class="summary-row total"><span><?php esc_html_e('Total', 'tailpress'); ?></span><span class="mono">{{ vm.cart.totals.total_price | wcPrice:vm.cart.totals }}</span></div>
             <a class="btn btn-dark btn-block" href="<?php echo esc_url(home_url('/checkout/')); ?>" style="margin-top:20px;"><?php esc_html_e('Continue to Checkout', 'tailpress'); ?></a>
         </div>
+
+        <!-- laws-of-ux pass: .summary loses `position: sticky` below 860px
+             (see .two-col's media query in storefront.css), so the primary
+             action can end up below the cart lines with no persistent CTA.
+             Nested inside this same ng-if block (not a separate sibling one)
+             so it shares scope/state with the rest of the cart view. -->
+        <div class="mobile-cta-bar">
+            <div class="mobile-cta-total">
+                <span><?php esc_html_e('Estimated total', 'tailpress'); ?></span>
+                <span class="mono">{{ vm.cart.totals.total_price | wcPrice:vm.cart.totals }}</span>
+            </div>
+            <a class="btn btn-dark" href="<?php echo esc_url(home_url('/checkout/')); ?>"><?php esc_html_e('Checkout', 'tailpress'); ?></a>
+        </div>
     </div>
 </section>
 

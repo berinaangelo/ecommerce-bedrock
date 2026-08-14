@@ -103,7 +103,7 @@ get_header();
                 </div>
                 <div class="field">
                     <label for="country"><?php esc_html_e('Country', 'tailpress'); ?></label>
-                    <select id="country" name="country" ng-model="vm.address.country" ng-options="code as name for (code, name) in vm.countries" required>
+                    <select id="country" name="country" ng-model="vm.address.country" ng-options="code as name for (code, name) in vm.countries" wc-select2 data-placeholder="<?php esc_attr_e('Select a country', 'tailpress'); ?>" required>
                         <option value=""><?php esc_html_e('Select a country', 'tailpress'); ?></option>
                     </select>
                 </div>
@@ -122,15 +122,22 @@ get_header();
                     </div>
                 </div>
                 <div class="field">
-                    <label for="phone"><?php esc_html_e('Phone (optional)', 'tailpress'); ?></label>
+                    <label for="phone"><?php esc_html_e('Phone', 'tailpress'); ?> <span class="field-optional">(<?php esc_html_e('optional', 'tailpress'); ?>)</span></label>
                     <input id="phone" name="phone" type="tel" ng-model="vm.address.phone">
                 </div>
-                <div class="checkbox-row">
-                    <input id="create_account" type="checkbox" ng-model="vm.createAccount">
-                    <label for="create_account"><?php esc_html_e('Create an account with this order — track future orders faster. Not required.', 'tailpress'); ?></label>
+
+                <!-- laws-of-ux pass: was inside the required-field flow with no
+                     visual separation, forcing every label to be read to tell
+                     required from optional (Hick's Law). Demoted below the
+                     required fields, same fix as docs/mockups/checkout.html. -->
+                <div class="account-opt">
+                    <div class="checkbox-row">
+                        <input id="create_account" type="checkbox" ng-model="vm.createAccount">
+                        <label for="create_account"><?php esc_html_e('Create an account with this order — track future orders faster. Not required.', 'tailpress'); ?></label>
+                    </div>
                 </div>
 
-                <button class="btn btn-cta" type="submit" ng-disabled="vm.submittingAddress || checkoutForm.$invalid">
+                <button class="btn btn-cta float-right mt-4" type="submit" ng-disabled="vm.submittingAddress || checkoutForm.$invalid">
                     <span ng-if="!vm.submittingAddress && !vm.addressConfirmed"><?php esc_html_e('Continue', 'tailpress'); ?></span>
                     <span ng-if="vm.submittingAddress"><?php esc_html_e('Saving…', 'tailpress'); ?></span>
                     <span ng-if="!vm.submittingAddress && vm.addressConfirmed"><?php esc_html_e('Saved ✓', 'tailpress'); ?></span>
@@ -140,6 +147,14 @@ get_header();
         </form>
 
         <div class="summary">
+            <!-- laws-of-ux pass: there was no way back to the cart from
+                 checkout — a shopper who wants to change qty/remove an item
+                 at the final step had no designed path. Same fix as
+                 docs/mockups/checkout.html. -->
+            <a class="back-link" href="<?php echo esc_url(home_url('/cart/')); ?>" style="margin-bottom:16px;display:inline-flex;">
+                <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                <?php esc_html_e('Edit cart', 'tailpress'); ?>
+            </a>
             <div class="summary-row"><span><?php esc_html_e('Subtotal', 'tailpress'); ?></span><span class="mono">{{ vm.cart.totals.total_items | wcPrice:vm.cart.totals }}</span></div>
             <div class="summary-row"><span><?php esc_html_e('Shipping', 'tailpress'); ?></span><span class="mono">{{ vm.addressConfirmed ? (vm.cart.totals.total_shipping | wcPrice:vm.cart.totals) : '—' }}</span></div>
             <div class="summary-row total"><span><?php esc_html_e('Total', 'tailpress'); ?></span><span class="mono">{{ vm.cart.totals.total_price | wcPrice:vm.cart.totals }}</span></div>
@@ -150,6 +165,28 @@ get_header();
                 <span ng-if="vm.placingOrder"><?php esc_html_e('Placing order…', 'tailpress'); ?></span>
             </button>
             <p class="micro-note" ng-if="vm.orderFailed">{{ vm.orderFailedMessage }}</p>
+        </div>
+
+        <!-- laws-of-ux pass: same mobile-reachability fix as page-cart.php.
+             Nested inside this ng-if block (not a separate sibling one) so
+             `checkoutForm` — published onto this block's own child scope by
+             the <form> above — is resolvable here; a sibling ng-if would sit
+             in an unrelated child scope and couldn't see it. Mirrors
+             whichever action is actually current: the address step's
+             Continue while unconfirmed, Place Order once it's confirmed. -->
+        <div class="mobile-cta-bar">
+            <div class="mobile-cta-total">
+                <span><?php esc_html_e('Total', 'tailpress'); ?></span>
+                <span class="mono">{{ vm.cart.totals.total_price | wcPrice:vm.cart.totals }}</span>
+            </div>
+            <button class="btn btn-dark" type="button" ng-if="!vm.addressConfirmed" ng-click="vm.submitAddress()" ng-disabled="vm.submittingAddress || checkoutForm.$invalid">
+                <span ng-if="!vm.submittingAddress"><?php esc_html_e('Continue', 'tailpress'); ?></span>
+                <span ng-if="vm.submittingAddress"><?php esc_html_e('Saving…', 'tailpress'); ?></span>
+            </button>
+            <button class="btn btn-dark" type="button" ng-if="vm.addressConfirmed" ng-click="vm.placeOrder()" ng-disabled="vm.placingOrder">
+                <span ng-if="!vm.placingOrder"><?php esc_html_e('Place Order', 'tailpress'); ?></span>
+                <span ng-if="vm.placingOrder"><?php esc_html_e('Placing…', 'tailpress'); ?></span>
+            </button>
         </div>
     </div>
 </section>

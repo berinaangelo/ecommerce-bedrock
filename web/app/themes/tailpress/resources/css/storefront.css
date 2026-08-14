@@ -366,8 +366,8 @@ body {
 .qty button {
   background: none;
   border: none;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   font-size: 1.15rem;
   cursor: pointer;
   color: var(--ink);
@@ -457,7 +457,7 @@ body {
   border: none;
   color: var(--ink-muted);
   cursor: pointer;
-  padding: 6px;
+  padding: 14px;
   border-radius: 999px;
   transition: color .15s, background .15s;
 }
@@ -554,6 +554,76 @@ legend {
   border-color: var(--purple);
   box-shadow: 0 0 0 4px rgba(var(--purple-rgb), .15);
 }
+
+/* Country field (wc-select2-directive.js): selectWoo hides the native
+   <select> above and renders its own markup instead, so `.field select`
+   never actually paints once it's initialized — matched to the same look
+   by hand, using selectWoo/select2's own class names (a WC-bundled select2
+   v4 fork, same DOM/classes as upstream select2). */
+.field .select2-container { width: 100% !important; }
+.field .select2-selection--single {
+  height: auto;
+  display: flex;
+  align-items: center;
+  padding: 13px 16px;
+  border-radius: var(--radius-input);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  transition: border-color .15s, box-shadow .15s;
+}
+.field .select2-container--open .select2-selection--single,
+.field .select2-container--focus .select2-selection--single {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 4px rgba(var(--purple-rgb), .15);
+}
+.field .select2-selection__rendered {
+  padding: 0;
+  line-height: normal;
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  font-size: .98rem;
+}
+.field .select2-selection__placeholder { color: var(--ink-muted); }
+.field .select2-selection__arrow {
+  height: auto;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+}
+.select2-dropdown {
+  border-color: var(--border);
+  border-radius: var(--radius-input);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.select2-search--dropdown {
+  padding: 10px;
+  background: var(--surface);
+}
+.select2-search--dropdown .select2-search__field {
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  padding: 8px 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  outline: none;
+}
+.select2-search--dropdown .select2-search__field:focus { border-color: var(--purple); }
+.select2-results__option {
+  padding: 10px 16px;
+  font-size: .92rem;
+  color: var(--ink);
+}
+.select2-results__option--highlighted[aria-selected] {
+  background: var(--purple) !important;
+  color: #fff !important;
+}
+.select2-results__option[aria-selected="true"] {
+  background: rgba(var(--purple-rgb), .1);
+}
+
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .field-row.three { grid-template-columns: 1.4fr 1fr 1fr; }
 .checkbox-row {
@@ -570,6 +640,62 @@ legend {
   flex: none;
 }
 .checkbox-row label { font-size: .9rem; color: var(--ink-muted); }
+
+/* laws-of-ux pass: visually demote optional/non-essential form elements so
+   the required shipping fields scan faster (Hick's Law) — same fix applied
+   to docs/mockups/checkout.html. */
+.field-optional {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink-muted);
+  margin-left: 4px;
+}
+.account-opt {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.account-opt .checkbox-row { margin: 0; }
+.account-opt label { font-size: .82rem; }
+
+/* laws-of-ux pass: on Cart/Checkout, .summary drops `position: sticky` below
+   860px (see .two-col's media query above), so the primary action can end up
+   below a long page with no persistent CTA — this fixed bar keeps it
+   reachable regardless of scroll position, mirroring the fix already applied
+   to docs/mockups/cart.html and checkout.html. */
+.mobile-cta-bar { display: none; }
+@media (max-width: 860px) {
+  .mobile-cta-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 20px rgba(19, 19, 19, .08);
+  }
+  .mobile-cta-bar .mobile-cta-total { display: flex; flex-direction: column; line-height: 1.2; }
+  .mobile-cta-bar .mobile-cta-total span:first-child {
+    font-size: .72rem;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .mobile-cta-bar .mobile-cta-total span:last-child {
+    font-family: 'JetBrains Mono';
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .mobile-cta-bar .btn { padding: 14px 22px; }
+  body:has(.mobile-cta-bar) { padding-bottom: 82px; }
+}
 
 /* Order recap (checkout summary line items + Module 5's confirmation view) */
 .recap-item {

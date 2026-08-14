@@ -66,7 +66,15 @@ composer install
 
 `bin/setup.sh` creates the database and app DB user, writes `.env`, runs the WordPress install via WP-CLI, builds and activates the TailPress theme, activates WooCommerce, and seeds demo products/shipping — a full clone-to-running-site setup with no manual browser install step. It's safe to re-run.
 
-To work on the theme/frontend directly:
+Once set up, day to day:
+
+```sh
+composer dev
+```
+
+Builds the theme's JS/CSS bundle (`pnpm build`), then starts WordPress's built-in dev server bound to whatever port `.env`'s `WP_HOME` declares (`bin/serve.sh` — see `WP_HOME` in `.env`, `http://localhost:8000` by default). Ctrl-C to stop. `composer build-theme` and `composer serve` also work standalone.
+
+To iterate on the theme/frontend with rebuild-on-save instead of a one-off build:
 
 ```sh
 cd web/app/themes/tailpress

@@ -73,9 +73,20 @@
     },
     "wordpress-install-dir": "web/wp"
   },
+  "autoload": {
+    "psr-4": {
+      "App\\Ecommerce\\": "web/app/mu-plugins/ecommerce/src/"
+    }
+  },
   "scripts": {
     "lint": "pint --test",
     "lint:fix": "pint",
-    "test": "pest"
+    "test": "pest",
+    "build-theme": "pnpm run --dir web/app/themes/tailpress build",
+    "serve": "bash bin/serve.sh",
+    "dev": [
+      "@build-theme",
+      "@serve"
+    ]
   }
 }

@@ -1,7 +1,7 @@
 <?php
 
-if (is_file(__DIR__.'/vendor/autoload_packages.php')) {
-    require_once __DIR__.'/vendor/autoload_packages.php';
+if (is_file(__DIR__ . '/vendor/autoload_packages.php')) {
+    require_once __DIR__ . '/vendor/autoload_packages.php';
 }
 
 // AngularJS 1.x, CDN-loaded (deliberately not an npm/pnpm dependency for now —
@@ -10,13 +10,21 @@ if (is_file(__DIR__.'/vendor/autoload_packages.php')) {
 const ANGULARJS_VERSION = '1.8.3';
 const ANGULARJS_SRI_HASH = 'sha384-quGekMf1ic6tIOn1GgLl0Pzra4ZkFyTcaDW3hZRjORqPQe3HnTKGl+lNPpuh7Lwv';
 
+// PayMongo public key (Module 4 step 5 — see docs/PLAN.md 4.6-4.13). Same
+// "pin it once at the top" spirit as ANGULARJS_VERSION above, but this one
+// is environment-dependent so it's define()'d from .env rather than a
+// literal const. Public key only — the secret key (PAYMONGO_SECRET_KEY) is
+// never read in this file and never reaches the client; it's only used by
+// PayMongoClient inside the mu-plugin.
+define('PAYMONGO_PUBLIC_KEY', (string) \Env\env('PAYMONGO_PUBLIC_KEY'));
+
 add_action('wp_enqueue_scripts', function () {
     wp_enqueue_script(
         'angularjs',
-        "https://cdn.jsdelivr.net/npm/angular@".ANGULARJS_VERSION."/angular.min.js",
+        "https://cdn.jsdelivr.net/npm/angular@" . ANGULARJS_VERSION . "/angular.min.js",
         [],
         ANGULARJS_VERSION,
-        true // footer, matches how the theme's own Vite assets load
+        true, // footer, matches how the theme's own Vite assets load
     );
 });
 
@@ -25,7 +33,7 @@ add_filter('script_loader_tag', function ($tag, $handle) {
         return $tag;
     }
 
-    return str_replace(' src=', ' integrity="'.ANGULARJS_SRI_HASH.'" crossorigin="anonymous" src=', $tag);
+    return str_replace(' src=', ' integrity="' . ANGULARJS_SRI_HASH . '" crossorigin="anonymous" src=', $tag);
 }, 10, 2);
 
 // Storefront design system fonts (Anton/Manrope/JetBrains Mono), CDN-loaded
@@ -36,8 +44,20 @@ add_action('wp_enqueue_scripts', function () {
         'storefront-fonts',
         'https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap',
         [],
-        null
+        null,
     );
+});
+
+// Checkout's country <select> (wc-select2-directive.js) reuses WooCommerce's
+// own selectWoo library instead of a second select2 copy — WC registers
+// both unconditionally, so depending on the handles is reliable, but only
+// conditionally enqueues them (is_cart()/is_checkout()/is_account_page()) —
+// enqueued explicitly here rather than relying on that condition to line up
+// with this page.
+add_action('wp_enqueue_scripts', function () {
+    if (is_checkout()) {
+        wp_enqueue_style('select2');
+    }
 });
 
 // Bridges the WooCommerce Store API base URL to the Angular app — the
@@ -69,14 +89,20 @@ add_action('wp_enqueue_scripts', function () {
         // name, straight from WooCommerce's own list (WC()->countries),
         // rather than hardcoding a single country in the Angular app.
         'countries' => WC()->countries->get_countries(),
+        // Module 4 step 5: PayMongo (4.9/4.10). Public key only.
+        'paymongoIntentUrl' => rest_url('ecommerce/v1/paymongo/intent'),
+        'paymongoPublicKey' => PAYMONGO_PUBLIC_KEY,
     ]);
 }, 20);
 
 function tailpress(): TailPress\Framework\Theme
 {
     return TailPress\Framework\Theme::instance()
-        ->assets(fn($manager) => $manager
-            ->withCompiler(new TailPress\Framework\Assets\ViteCompiler, fn($compiler) => $compiler
+        ->assets(
+            fn($manager) => $manager
+            ->withCompiler(
+                new TailPress\Framework\Assets\ViteCompiler(),
+                fn($compiler) => $compiler
                 ->registerAsset('resources/css/app.css')
                 ->registerAsset('resources/js/app.js')
                 ->registerAsset('resources/js/angular-app.js', ['angularjs'])
@@ -89,9 +115,10 @@ function tailpress(): TailPress\Framework\Theme
                 ->registerAsset('resources/js/controllers/cart-badge-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-cart-repository'])
                 ->registerAsset('resources/js/controllers/cart-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-cart-repository', 'tailpress-price-formatter'])
                 ->registerAsset('resources/js/controllers/checkout-controller.js', ['angularjs', 'tailpress-angular-app', 'tailpress-cart-repository', 'tailpress-price-formatter'])
-                ->editorStyleFile('resources/css/editor-style.css')
+                ->registerAsset('resources/js/directives/wc-select2-directive.js', ['jquery', 'selectWoo', 'angularjs', 'tailpress-angular-app'])
+                ->editorStyleFile('resources/css/editor-style.css'),
             )
-            ->enqueueAssets()
+            ->enqueueAssets(),
         )
         ->features(fn($manager) => $manager->add(TailPress\Framework\Features\MenuOptions::class))
         ->menus(fn($manager) => $manager->add('primary', 'Primary Menu'))
@@ -108,7 +135,7 @@ function tailpress(): TailPress\Framework\Theme
                 'comment-list',
                 'gallery',
                 'caption',
-            ]
+            ],
         ]));
 }
 

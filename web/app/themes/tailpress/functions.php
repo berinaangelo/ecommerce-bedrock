@@ -59,6 +59,7 @@ add_action('wp_enqueue_scripts', function () {
         // Module 4: Checkout.
         'cartUpdateCustomerUrl' => rest_url('wc/store/v1/cart/update-customer'),
         'cartSelectShippingRateUrl' => rest_url('wc/store/v1/cart/select-shipping-rate'),
+        'checkoutUrl' => rest_url('wc/store/v1/checkout'),
         // Module 2: Product detail. Only set on a single-product page — the
         // id Angular fetches, since there's no client-side router to derive
         // it from the URL (see single-product.php).

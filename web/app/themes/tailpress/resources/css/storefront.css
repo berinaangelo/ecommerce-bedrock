@@ -503,6 +503,72 @@ body {
 }
 .btn-block { width: 100%; }
 
+/* Checkout forms */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 34px;
+}
+legend {
+  font-family: 'Anton', system-ui, sans-serif;
+  text-transform: uppercase;
+  font-size: 1.15rem;
+  margin-bottom: 18px;
+  padding: 0;
+}
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-size: .75rem;
+  font-weight: 700;
+  margin-bottom: 7px;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.field input {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: var(--radius-input);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: 'Manrope';
+  font-size: .98rem;
+  transition: border-color .15s, box-shadow .15s;
+}
+.field input::placeholder { color: var(--ink-muted); opacity: .7; }
+.field input:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 4px rgba(var(--purple-rgb), .15);
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field-row.three { grid-template-columns: 1.4fr 1fr 1fr; }
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 22px 0 6px;
+}
+.checkbox-row input {
+  width: 19px;
+  height: 19px;
+  margin-top: 2px;
+  accent-color: var(--purple);
+  flex: none;
+}
+.checkbox-row label { font-size: .9rem; color: var(--ink-muted); }
+
+/* Order recap (checkout summary line items + Module 5's confirmation view) */
+.recap-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: .9rem;
+  padding-block: 9px;
+}
+.recap-item .mono { color: var(--ink-muted); }
+
 /* Footer */
 footer.storefront-footer {
   border-top: 1px solid var(--border);

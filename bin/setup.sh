@@ -227,6 +227,14 @@ info "Activating WooCommerce..."
 info "Enabling Cash on Delivery as the (temporary) payment method..."
 "$WP_CLI" wc payment_gateway update cod --user="$ADMIN_USER" --enabled=true >/dev/null
 
+# Module 4.4's "Create an account with this order" checkbox does nothing
+# server-side unless this is enabled — WooCommerce's own default is "no",
+# which makes should_create_customer_account() in the Store API's Checkout
+# route always return false regardless of the request's create_account flag.
+# Idempotent.
+info "Enabling account creation during checkout..."
+"$WP_CLI" option update woocommerce_enable_signup_and_login_from_checkout yes >/dev/null
+
 # The Store API's shipping-rate selection (Module 4) has nothing to select
 # until a shipping zone has at least one method — a fresh WooCommerce install
 # has zero configured on any zone. Adding one flat rate to the default

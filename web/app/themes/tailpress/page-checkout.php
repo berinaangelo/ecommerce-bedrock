@@ -3,11 +3,11 @@
  * Module 4: Checkout — WooCommerce's auto-created Checkout page (slug
  * "checkout"). Same `page-{slug}.php` convention as page-shop.php/page-cart.php.
  *
- * This slice (items 4.0-4.2) covers the address form and getting a real
- * shipping rate back — it stops there. Payment is a Cash on Delivery
- * stand-in for now (see docs/PLAN.md's build-sequence decision) and isn't
- * wired up yet, so there's no "Place Order" action on this page until that
- * lands.
+ * Items 4.0-4.5: address form, real shipping rate, optional account
+ * creation, and placing the order. Payment is still the Cash on Delivery
+ * stand-in (see docs/PLAN.md's build-sequence decision) — real Stripe is its
+ * own dedicated step. On success this renders a minimal one-line
+ * confirmation stand-in, not the mockup's full recap view — that's Module 5.
  *
  * @package TailPress
  */
@@ -23,7 +23,17 @@ get_header();
     <p class="empty-state" ng-if="vm.loading"><?php esc_html_e('Loading checkout…', 'tailpress'); ?></p>
     <p class="empty-state" ng-if="!vm.loading && vm.failed"><?php esc_html_e("Couldn't load your cart right now — please try again shortly.", 'tailpress'); ?></p>
 
-    <div class="two-col" ng-if="!vm.loading && !vm.failed">
+    <!-- 4.3: stand-in for the real confirmation — Module 5 replaces this
+         with the mockup's full recap view, reading this same vm.order state. -->
+    <div class="empty-state" ng-if="vm.orderPlaced">
+        <?php
+        /* translators: %s is the order number. */
+        echo esc_html(sprintf(__('Order #%s placed!', 'tailpress'), '{{ vm.order.order_number }}'));
+        ?>
+        <a class="back-link" href="<?php echo esc_url(home_url('/shop/')); ?>"><?php esc_html_e('Continue shopping', 'tailpress'); ?></a>
+    </div>
+
+    <div class="two-col" ng-if="!vm.loading && !vm.failed && !vm.orderPlaced">
         <form name="checkoutForm" ng-submit="vm.submitAddress()">
             <fieldset>
                 <legend><?php esc_html_e('Contact & shipping', 'tailpress'); ?></legend>
@@ -64,6 +74,10 @@ get_header();
                     <label for="phone"><?php esc_html_e('Phone (optional)', 'tailpress'); ?></label>
                     <input id="phone" name="phone" type="tel" ng-model="vm.address.phone">
                 </div>
+                <div class="checkbox-row">
+                    <input id="create_account" type="checkbox" ng-model="vm.createAccount">
+                    <label for="create_account"><?php esc_html_e('Create an account with this order — track future orders faster. Not required.', 'tailpress'); ?></label>
+                </div>
 
                 <button class="btn btn-cta" type="submit" ng-disabled="vm.submittingAddress || checkoutForm.$invalid">
                     <span ng-if="!vm.submittingAddress && !vm.addressConfirmed"><?php esc_html_e('Continue', 'tailpress'); ?></span>
@@ -78,6 +92,13 @@ get_header();
             <div class="summary-row"><span><?php esc_html_e('Subtotal', 'tailpress'); ?></span><span class="mono">{{ vm.cart.totals.total_items | wcPrice:vm.cart.totals }}</span></div>
             <div class="summary-row"><span><?php esc_html_e('Shipping', 'tailpress'); ?></span><span class="mono">{{ vm.addressConfirmed ? (vm.cart.totals.total_shipping | wcPrice:vm.cart.totals) : '—' }}</span></div>
             <div class="summary-row total"><span><?php esc_html_e('Total', 'tailpress'); ?></span><span class="mono">{{ vm.cart.totals.total_price | wcPrice:vm.cart.totals }}</span></div>
+
+            <!-- 4.3: only appears once a shipping rate is confirmed (4.0-4.2) -->
+            <button class="btn btn-dark btn-block" type="button" ng-if="vm.addressConfirmed" ng-click="vm.placeOrder()" ng-disabled="vm.placingOrder" style="margin-top:20px;">
+                <span ng-if="!vm.placingOrder"><?php esc_html_e('Place Order', 'tailpress'); ?> — {{ vm.cart.totals.total_price | wcPrice:vm.cart.totals }}</span>
+                <span ng-if="vm.placingOrder"><?php esc_html_e('Placing order…', 'tailpress'); ?></span>
+            </button>
+            <p class="micro-note" ng-if="vm.orderFailed"><?php esc_html_e("Couldn't place your order — please try again.", 'tailpress'); ?></p>
         </div>
     </div>
 </section>

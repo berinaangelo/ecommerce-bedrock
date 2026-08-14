@@ -96,4 +96,29 @@ angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonc
             }
         );
     };
+
+    // Module 4: Checkout (4.3). Same address object as updateCustomer, reused
+    // as both billing and shipping — POST /wc/store/v1/checkout creates the
+    // real order. `createAccount` maps straight to the Store API's own
+    // `create_account` flag; no password is sent (see checkout-controller.js),
+    // so WooCommerce generates one and emails the new user.
+    this.placeOrder = function (address, paymentMethod, createAccount) {
+        return $http.post(
+            window.ecommerceStoreApi.checkoutUrl,
+            {
+                billing_address: address,
+                shipping_address: address,
+                payment_method: paymentMethod,
+                create_account: createAccount
+            },
+            { headers: { 'Nonce': StoreApiNonce.current } }
+        ).then(
+            function (response) {
+                return { order: response.data, failed: false };
+            },
+            function () {
+                return { order: null, failed: true };
+            }
+        );
+    };
 }]);

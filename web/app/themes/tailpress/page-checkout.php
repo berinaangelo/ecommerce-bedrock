@@ -71,6 +71,11 @@ get_header();
                 {{ vm.countries[vm.order.shipping_address.country] || vm.order.shipping_address.country }}
             </div>
         </div>
+
+        <!-- 5.3 -->
+        <div class="confirm-actions">
+            <a class="btn btn-outline" href="<?php echo esc_url(home_url('/shop/')); ?>"><?php esc_html_e('Continue Shopping', 'tailpress'); ?></a>
+        </div>
     </div>
 
     <div class="two-col" ng-if="!vm.loading && !vm.failed && !vm.orderPlaced">

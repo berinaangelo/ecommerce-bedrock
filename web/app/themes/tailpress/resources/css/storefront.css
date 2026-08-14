@@ -502,6 +502,15 @@ body {
   box-shadow: 0 12px 24px rgba(19, 19, 19, .22);
 }
 .btn-block { width: 100%; }
+.btn-outline {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--border);
+}
+.btn-outline:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+}
 
 /* Checkout forms */
 fieldset {
@@ -570,6 +579,62 @@ legend {
   padding-block: 9px;
 }
 .recap-item .mono { color: var(--ink-muted); }
+
+/* Order confirmation (5.4) — confetti intentionally not ported, cut in 5.0 */
+.confirm-wrap {
+  max-width: 640px;
+  margin-inline: auto;
+  padding: 90px 24px 100px;
+  text-align: center;
+}
+.confirm-wrap h1 { font-size: clamp(2rem, 5vw, 3rem); }
+.confirm-wrap .eyebrow { display: block; margin-bottom: 14px; }
+.check-circle {
+  width: 96px;
+  height: 96px;
+  border-radius: 999px;
+  background: rgba(var(--red-rgb), .09);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 30px;
+  position: relative;
+}
+.check-circle svg { width: 52px; height: 52px; }
+.check-circle path {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 80;
+  stroke-dashoffset: 80;
+  animation: draw .8s ease forwards .25s;
+}
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .check-circle path { animation: none; stroke-dashoffset: 0; }
+}
+.order-recap {
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 26px;
+  margin-top: 40px;
+}
+.recap-addr {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  font-size: .85rem;
+  color: var(--ink-muted);
+}
+.confirm-actions {
+  margin-top: 34px;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
 
 /* Footer */
 footer.storefront-footer {

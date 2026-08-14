@@ -62,7 +62,7 @@ confirm() {
 info "Checking prerequisites..."
 require_cmd php
 require_cmd composer
-require_cmd npm
+require_cmd pnpm
 require_cmd mysql
 require_cmd mysqladmin
 require_cmd openssl
@@ -196,8 +196,8 @@ fi
 if [ -f web/app/themes/tailpress/composer.json ]; then
     info "Installing TailPress theme dependencies..."
     composer install --working-dir=web/app/themes/tailpress
-    npm install --prefix web/app/themes/tailpress
-    npm run build --prefix web/app/themes/tailpress
+    pnpm install --dir web/app/themes/tailpress
+    pnpm run --dir web/app/themes/tailpress build
 fi
 
 info "Activating TailPress theme..."

@@ -313,6 +313,35 @@ legend{font-family:'Anton';text-transform:uppercase;font-size:1.15rem;margin-bot
 footer{border-top:1px solid var(--border);padding-block:32px;margin-top:auto;}
 footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
 footer .eyebrow{color:var(--ink-muted);}
+
+/* --- laws-of-ux review fixes --- */
+.qty button{width:44px;height:44px;}
+.remove-btn{padding:14px;}
+.field-optional{font-weight:500;text-transform:none;letter-spacing:0;color:var(--ink-muted);margin-left:4px;}
+.field.has-error input{border-color:var(--red);box-shadow:0 0 0 4px rgba(var(--red-rgb),.12);}
+.field-error{display:none;margin-top:6px;font-size:.8rem;color:var(--red);font-weight:600;}
+.field.has-error .field-error{display:block;}
+.form-banner{display:none;align-items:center;gap:10px;background:rgba(var(--red-rgb),.08);border:1.5px solid rgba(var(--red-rgb),.35);color:var(--red);border-radius:var(--radius-input);padding:14px 16px;font-size:.88rem;font-weight:600;margin-bottom:22px;}
+.form-banner.is-visible{display:flex;}
+.btn.is-loading{opacity:.75;pointer-events:none;}
+.account-opt{margin-top:22px;padding-top:18px;border-top:1px solid var(--border);}
+.account-opt .checkbox-row{margin:0;}
+.account-opt label{font-size:.82rem;}
+.mobile-cta-bar{display:none;}
+@media (max-width:860px){
+  .mobile-cta-bar{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:var(--surface);border-top:1px solid var(--border);
+    padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+    box-shadow:0 -8px 20px rgba(19,19,19,.08);
+  }
+  .mobile-cta-bar .mobile-cta-total{display:flex;flex-direction:column;line-height:1.2;}
+  .mobile-cta-bar .mobile-cta-total span:first-child{font-size:.72rem;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.04em;}
+  .mobile-cta-bar .mobile-cta-total span:last-child{font-family:'JetBrains Mono';font-weight:700;font-size:1.05rem;}
+  .mobile-cta-bar .btn{padding:14px 22px;}
+  body:has(.mobile-cta-bar){padding-bottom:82px;}
+}
 </style>
 </head>
 <body>
@@ -382,6 +411,7 @@ footer .eyebrow{color:var(--ink-muted);}
 
 <script>
   var b = document.getElementById('addToCart');
+  var badge = document.querySelector('.cart-badge');
   if (b) {
     b.addEventListener('click', function () {
       b.classList.remove('is-popping');
@@ -390,6 +420,9 @@ footer .eyebrow{color:var(--ink-muted);}
       var original = b.textContent;
       b.textContent = 'Added \u2713';
       setTimeout(function () { b.textContent = original; }, 1400);
+      if (badge) {
+        badge.textContent = String(Number(badge.textContent || '0') + 1);
+      }
     });
   }
 </script>

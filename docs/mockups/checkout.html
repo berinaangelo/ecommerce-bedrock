@@ -313,6 +313,35 @@ legend{font-family:'Anton';text-transform:uppercase;font-size:1.15rem;margin-bot
 footer{border-top:1px solid var(--border);padding-block:32px;margin-top:auto;}
 footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
 footer .eyebrow{color:var(--ink-muted);}
+
+/* --- laws-of-ux review fixes --- */
+.qty button{width:44px;height:44px;}
+.remove-btn{padding:14px;}
+.field-optional{font-weight:500;text-transform:none;letter-spacing:0;color:var(--ink-muted);margin-left:4px;}
+.field.has-error input{border-color:var(--red);box-shadow:0 0 0 4px rgba(var(--red-rgb),.12);}
+.field-error{display:none;margin-top:6px;font-size:.8rem;color:var(--red);font-weight:600;}
+.field.has-error .field-error{display:block;}
+.form-banner{display:none;align-items:center;gap:10px;background:rgba(var(--red-rgb),.08);border:1.5px solid rgba(var(--red-rgb),.35);color:var(--red);border-radius:var(--radius-input);padding:14px 16px;font-size:.88rem;font-weight:600;margin-bottom:22px;}
+.form-banner.is-visible{display:flex;}
+.btn.is-loading{opacity:.75;pointer-events:none;}
+.account-opt{margin-top:22px;padding-top:18px;border-top:1px solid var(--border);}
+.account-opt .checkbox-row{margin:0;}
+.account-opt label{font-size:.82rem;}
+.mobile-cta-bar{display:none;}
+@media (max-width:860px){
+  .mobile-cta-bar{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:var(--surface);border-top:1px solid var(--border);
+    padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+    box-shadow:0 -8px 20px rgba(19,19,19,.08);
+  }
+  .mobile-cta-bar .mobile-cta-total{display:flex;flex-direction:column;line-height:1.2;}
+  .mobile-cta-bar .mobile-cta-total span:first-child{font-size:.72rem;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.04em;}
+  .mobile-cta-bar .mobile-cta-total span:last-child{font-family:'JetBrains Mono';font-weight:700;font-size:1.05rem;}
+  .mobile-cta-bar .btn{padding:14px 22px;}
+  body:has(.mobile-cta-bar){padding-bottom:82px;}
+}
 </style>
 </head>
 <body>
@@ -330,48 +359,57 @@ footer .eyebrow{color:var(--ink-muted);}
       <h1 style="font-size:clamp(1.9rem,3.2vw + 1rem,2.6rem);">Checkout</h1>
     </div>
     <div class="two-col">
-      <form onsubmit="return false;">
+      <form id="checkoutForm" onsubmit="return false;">
+        <div class="form-banner" id="formBanner">Please fill in the highlighted fields before placing your order.</div>
         <fieldset>
           <legend>Contact &amp; shipping</legend>
-          <div class="field"><label for="email">Email</label><input id="email" type="email" placeholder="you@email.com"></div>
-          <div class="field"><label for="name">Full name</label><input id="name" type="text" placeholder="Jordan Alvarez"></div>
-          <div class="field"><label for="addr">Address</label><input id="addr" type="text" placeholder="123 Market Street, Apt 4B"></div>
+          <div class="field"><label for="email">Email</label><input id="email" type="email" placeholder="you@email.com"><span class="field-error">Enter your email address.</span></div>
+          <div class="field"><label for="name">Full name</label><input id="name" type="text" placeholder="Jordan Alvarez"><span class="field-error">Enter your full name.</span></div>
+          <div class="field"><label for="addr">Address</label><input id="addr" type="text" placeholder="123 Market Street, Apt 4B"><span class="field-error">Enter your street address.</span></div>
           <div class="field-row three">
-            <div class="field"><label for="city">City</label><input id="city" type="text" placeholder="Austin"></div>
-            <div class="field"><label for="state">State</label><input id="state" type="text" placeholder="TX"></div>
-            <div class="field"><label for="zip">ZIP</label><input id="zip" type="text" placeholder="78701"></div>
+            <div class="field"><label for="city">City</label><input id="city" type="text" placeholder="Austin"><span class="field-error">Required.</span></div>
+            <div class="field"><label for="state">State</label><input id="state" type="text" placeholder="TX"><span class="field-error">Required.</span></div>
+            <div class="field"><label for="zip">ZIP</label><input id="zip" type="text" placeholder="78701"><span class="field-error">Required.</span></div>
           </div>
-          <div class="field"><label for="phone">Phone (optional)</label><input id="phone" type="tel" placeholder="For delivery updates only"></div>
-          <div class="checkbox-row">
-            <input id="mkacct" type="checkbox">
-            <label for="mkacct">Create an account with this order &mdash; track future orders faster. Not required.</label>
-          </div>
+          <div class="field"><label for="phone">Phone <span class="field-optional">(optional)</span></label><input id="phone" type="tel" placeholder="For delivery updates only"></div>
         </fieldset>
 
         <fieldset style="margin-bottom:8px;">
           <legend>Payment</legend>
           <div class="card-icons"><span>VISA</span><span>MC</span><span>AMEX</span></div>
-          <div class="field"><label for="cardnum">Card number</label><input id="cardnum" type="text" placeholder="4242 4242 4242 4242"></div>
+          <div class="field"><label for="cardnum">Card number</label><input id="cardnum" type="text" placeholder="4242 4242 4242 4242"><span class="field-error">Enter your card number.</span></div>
           <div class="field-row">
-            <div class="field"><label for="exp">Expiry</label><input id="exp" type="text" placeholder="MM / YY"></div>
-            <div class="field"><label for="cvc">CVC</label><input id="cvc" type="text" placeholder="123"></div>
+            <div class="field"><label for="exp">Expiry</label><input id="exp" type="text" placeholder="MM / YY"><span class="field-error">Required.</span></div>
+            <div class="field"><label for="cvc">CVC</label><input id="cvc" type="text" placeholder="123"><span class="field-error">Required.</span></div>
           </div>
           <p class="micro-note">Payments processed securely by Stripe. Signal never sees or stores your card number.</p>
+          <div class="account-opt">
+            <div class="checkbox-row">
+              <input id="mkacct" type="checkbox">
+              <label for="mkacct">Create an account with this order &mdash; track future orders faster. Not required.</label>
+            </div>
+          </div>
         </fieldset>
       </form>
 
       <div class="summary">
+        <a class="back-link" href="cart.html" style="margin-bottom:16px;display:inline-flex;"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Edit cart</a>
         <div class="recap-item"><span>Pulse Wireless Earbuds &times;1</span><span class="mono">$89.00</span></div>
         <div class="recap-item"><span>Signal Braided Cable &times;2</span><span class="mono">$38.00</span></div>
         <div class="summary-row" style="margin-top:6px;"><span>Subtotal</span><span class="mono">$127.00</span></div>
         <div class="summary-row"><span>Shipping</span><span class="mono">$6.00</span></div>
         <div class="summary-row total"><span>Total</span><span class="mono">$133.00</span></div>
-        <a class="btn btn-dark btn-block" href="confirmation.html" style="margin-top:20px;">Place Order &mdash; $133.00</a>
+        <button class="btn btn-dark btn-block" type="button" id="placeOrderBtn" style="margin-top:20px;">Place Order &mdash; $133.00</button>
       </div>
     </div>
   </div>
 
 </main>
+
+  <div class="mobile-cta-bar">
+    <div class="mobile-cta-total"><span>Total</span><span class="mono">$133.00</span></div>
+    <button class="btn btn-dark" type="button" id="mobilePlaceOrder">Place Order</button>
+  </div>
 
   <footer>
     <div class="wrap">
@@ -379,6 +417,55 @@ footer .eyebrow{color:var(--ink-muted);}
       <span class="eyebrow">Free shipping over $100 &middot; 30-day returns</span>
     </div>
   </footer>
+
+<script>
+(function () {
+  var banner = document.getElementById('formBanner');
+  var requiredIds = ['email','name','addr','city','state','zip','cardnum','exp','cvc'];
+
+  function clearErrors() {
+    requiredIds.forEach(function (id) {
+      var input = document.getElementById(id);
+      if (input) input.closest('.field').classList.remove('has-error');
+    });
+    if (banner) banner.classList.remove('is-visible');
+  }
+
+  function validate() {
+    var ok = true;
+    var firstInvalid = null;
+    requiredIds.forEach(function (id) {
+      var input = document.getElementById(id);
+      if (input && !input.value.trim()) {
+        input.closest('.field').classList.add('has-error');
+        ok = false;
+        firstInvalid = firstInvalid || input;
+      }
+    });
+    if (!ok) {
+      if (banner) banner.classList.add('is-visible');
+      if (firstInvalid) firstInvalid.focus();
+    }
+    return ok;
+  }
+
+  function placeOrder(btn) {
+    clearErrors();
+    if (!validate()) return;
+    var original = btn.textContent;
+    btn.classList.add('is-loading');
+    btn.textContent = 'Processing…';
+    setTimeout(function () {
+      window.location.href = 'confirmation.html';
+    }, 900);
+  }
+
+  var mainBtn = document.getElementById('placeOrderBtn');
+  var mobileBtn = document.getElementById('mobilePlaceOrder');
+  if (mainBtn) mainBtn.addEventListener('click', function () { placeOrder(mainBtn); });
+  if (mobileBtn) mobileBtn.addEventListener('click', function () { placeOrder(mobileBtn); });
+})();
+</script>
 
 </body>
 </html>

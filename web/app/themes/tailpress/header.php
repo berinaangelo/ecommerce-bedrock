@@ -101,4 +101,4 @@
         <?php endif; ?>
 
         <?php do_action('tailpress_content_start'); ?>
-        <main>
+        <main ng-app="ecommerceApp">

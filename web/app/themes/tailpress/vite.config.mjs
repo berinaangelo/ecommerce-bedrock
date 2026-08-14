@@ -18,6 +18,7 @@ export default defineConfig(({ command }) => {
             rollupOptions: {
                 input: [
                     'resources/js/app.js',
+                    'resources/js/angular-app.js',
                     'resources/css/app.css',
                     'resources/css/editor-style.css'
                 ],

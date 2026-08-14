@@ -3,11 +3,13 @@
  * Module 4: Checkout — WooCommerce's auto-created Checkout page (slug
  * "checkout"). Same `page-{slug}.php` convention as page-shop.php/page-cart.php.
  *
- * Items 4.0-4.5: address form, real shipping rate, optional account
- * creation, and placing the order. Payment is still the Cash on Delivery
- * stand-in (see docs/PLAN.md's build-sequence decision) — real Stripe is its
- * own dedicated step. On success this renders a minimal one-line
- * confirmation stand-in, not the mockup's full recap view — that's Module 5.
+ * Items 4.0-4.5: address form (any country, not just the store's base
+ * country — see checkout-controller.js), real shipping rate, optional
+ * account creation, and placing the order. Payment is still the Cash on
+ * Delivery stand-in (see docs/PLAN.md's build-sequence decision) — real
+ * Stripe is its own dedicated step. On success this renders a minimal
+ * one-line confirmation stand-in, not the mockup's full recap view — that's
+ * Module 5.
  *
  * @package TailPress
  */
@@ -56,6 +58,12 @@ get_header();
                     <label for="address_1"><?php esc_html_e('Address', 'tailpress'); ?></label>
                     <input id="address_1" name="address_1" type="text" ng-model="vm.address.address_1" required>
                 </div>
+                <div class="field">
+                    <label for="country"><?php esc_html_e('Country', 'tailpress'); ?></label>
+                    <select id="country" name="country" ng-model="vm.address.country" ng-options="code as name for (code, name) in vm.countries" required>
+                        <option value=""><?php esc_html_e('Select a country', 'tailpress'); ?></option>
+                    </select>
+                </div>
                 <div class="field-row three">
                     <div class="field">
                         <label for="city"><?php esc_html_e('City', 'tailpress'); ?></label>
@@ -84,7 +92,7 @@ get_header();
                     <span ng-if="vm.submittingAddress"><?php esc_html_e('Saving…', 'tailpress'); ?></span>
                     <span ng-if="!vm.submittingAddress && vm.addressConfirmed"><?php esc_html_e('Saved ✓', 'tailpress'); ?></span>
                 </button>
-                <p class="micro-note" ng-if="vm.addressFailed"><?php esc_html_e("Couldn't save your address — please try again.", 'tailpress'); ?></p>
+                <p class="micro-note" ng-if="vm.addressFailed">{{ vm.addressFailedMessage }}</p>
             </fieldset>
         </form>
 
@@ -98,7 +106,7 @@ get_header();
                 <span ng-if="!vm.placingOrder"><?php esc_html_e('Place Order', 'tailpress'); ?> — {{ vm.cart.totals.total_price | wcPrice:vm.cart.totals }}</span>
                 <span ng-if="vm.placingOrder"><?php esc_html_e('Placing order…', 'tailpress'); ?></span>
             </button>
-            <p class="micro-note" ng-if="vm.orderFailed"><?php esc_html_e("Couldn't place your order — please try again.", 'tailpress'); ?></p>
+            <p class="micro-note" ng-if="vm.orderFailed">{{ vm.orderFailedMessage }}</p>
         </div>
     </div>
 </section>

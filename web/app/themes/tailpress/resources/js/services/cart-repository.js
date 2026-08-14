@@ -3,6 +3,28 @@
 // `cartAddItemUrl` is bridged in from PHP via wp_localize_script, same as
 // ecommerceStoreApi.productsUrl.
 angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonce', function ($http, StoreApiNonce) {
+    // The Store API's field-validation errors (invalid postcode/state/etc.,
+    // from free-text address input) carry the real, specific reason one
+    // level deeper than the top-level `message` — that top-level message is
+    // just the generic "Invalid parameter(s): billing_address,
+    // shipping_address", with the actual "why" per-field in `data.params`
+    // (confirmed against WP_REST_Server's rest_invalid_param response
+    // shape). Falls back to the top-level message, then a generic string,
+    // for errors that aren't shaped this way (e.g. a missing/invalid nonce).
+    function addressErrorMessage(response) {
+        var data = response.data || {};
+        var params = data.data && data.data.params;
+
+        if (params) {
+            // billing/shipping usually carry the same message (one address
+            // object submitted as both) — de-duplicate rather than repeat it.
+            var messages = Object.keys(params).map(function (key) { return params[key]; });
+            return messages.filter(function (message, index) { return messages.indexOf(message) === index; }).join(' ');
+        }
+
+        return data.message || 'Something went wrong — please try again.';
+    }
+
     // Never rejects, same fallback convention as ProductRepository — a failed
     // add-to-cart resolves with `failed: true` instead of an unhandled
     // rejection, so the controller can show a real error state.
@@ -76,8 +98,8 @@ angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonc
             function (response) {
                 return { cart: response.data, failed: false };
             },
-            function () {
-                return { cart: null, failed: true };
+            function (response) {
+                return { cart: null, failed: true, message: addressErrorMessage(response) };
             }
         );
     };
@@ -91,8 +113,8 @@ angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonc
             function (response) {
                 return { cart: response.data, failed: false };
             },
-            function () {
-                return { cart: null, failed: true };
+            function (response) {
+                return { cart: null, failed: true, message: addressErrorMessage(response) };
             }
         );
     };
@@ -116,8 +138,8 @@ angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonc
             function (response) {
                 return { order: response.data, failed: false };
             },
-            function () {
-                return { order: null, failed: true };
+            function (response) {
+                return { order: null, failed: true, message: addressErrorMessage(response) };
             }
         );
     };

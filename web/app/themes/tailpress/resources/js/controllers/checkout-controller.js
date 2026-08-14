@@ -1,7 +1,11 @@
 // Module 4: Checkout. Loads the cart on init (for the summary panel, same as
-// CartController) and owns the address form. Country is fixed to the store's
-// own base country (US) rather than a form field — no separate UI, since
-// this storefront isn't scoped for multi-country shipping.
+// CartController) and owns the address form. Country is a real field (any
+// WooCommerce-recognized country, bridged in via ecommerceStoreApi.countries
+// — see functions.php) rather than fixed to the store's own base country —
+// shipping is unrestricted (the default catch-all zone matches any
+// destination) and WooCommerce's own address validation already adapts
+// per-country (state names/codes, postcode format), so there's no extra
+// validation logic needed here beyond letting the shopper pick one.
 //
 // Payment is still the Cash on Delivery stand-in (see docs/PLAN.md's
 // build-sequence decision) — real Stripe is its own dedicated step. On a
@@ -15,6 +19,9 @@ angular.module('ecommerceApp').controller('CheckoutController', ['CartRepository
     vm.failed = false;
     vm.cart = null;
 
+    // Bridged in from PHP (WC()->countries->get_countries()) — code => name.
+    vm.countries = window.ecommerceStoreApi.countries;
+
     vm.address = {
         first_name: '',
         last_name: '',
@@ -24,11 +31,12 @@ angular.module('ecommerceApp').controller('CheckoutController', ['CartRepository
         city: '',
         state: '',
         postcode: '',
-        country: 'US'
+        country: ''
     };
 
     vm.submittingAddress = false;
     vm.addressFailed = false;
+    vm.addressFailedMessage = '';
     vm.addressConfirmed = false;
 
     // 4.4: optional account creation, off the order's billing email — not
@@ -38,6 +46,7 @@ angular.module('ecommerceApp').controller('CheckoutController', ['CartRepository
 
     vm.placingOrder = false;
     vm.orderFailed = false;
+    vm.orderFailedMessage = '';
     vm.orderPlaced = false;
     vm.order = null;
 
@@ -58,6 +67,7 @@ angular.module('ecommerceApp').controller('CheckoutController', ['CartRepository
         if (!firstRate) {
             vm.submittingAddress = false;
             vm.addressFailed = true;
+            vm.addressFailedMessage = 'No shipping method is available for this address.';
             return;
         }
 
@@ -66,6 +76,7 @@ angular.module('ecommerceApp').controller('CheckoutController', ['CartRepository
 
             if (result.failed) {
                 vm.addressFailed = true;
+                vm.addressFailedMessage = result.message;
                 return;
             }
 
@@ -86,6 +97,7 @@ angular.module('ecommerceApp').controller('CheckoutController', ['CartRepository
             if (result.failed) {
                 vm.submittingAddress = false;
                 vm.addressFailed = true;
+                vm.addressFailedMessage = result.message;
                 return;
             }
 
@@ -114,6 +126,7 @@ angular.module('ecommerceApp').controller('CheckoutController', ['CartRepository
 
             if (result.failed) {
                 vm.orderFailed = true;
+                vm.orderFailedMessage = result.message;
                 return;
             }
 

@@ -64,6 +64,11 @@ add_action('wp_enqueue_scripts', function () {
         // id Angular fetches, since there's no client-side router to derive
         // it from the URL (see single-product.php).
         'productId' => is_singular('product') ? get_the_ID() : null,
+        // Module 4: Checkout. The Store API has no countries endpoint, so
+        // this is bridged the same way as everything else here — code =>
+        // name, straight from WooCommerce's own list (WC()->countries),
+        // rather than hardcoding a single country in the Angular app.
+        'countries' => WC()->countries->get_countries(),
     ]);
 }, 20);
 

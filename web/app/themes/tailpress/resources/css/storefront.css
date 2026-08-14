@@ -526,7 +526,8 @@ legend {
   text-transform: uppercase;
   letter-spacing: .04em;
 }
-.field input {
+.field input,
+.field select {
   width: 100%;
   padding: 13px 16px;
   border-radius: var(--radius-input);
@@ -538,7 +539,8 @@ legend {
   transition: border-color .15s, box-shadow .15s;
 }
 .field input::placeholder { color: var(--ink-muted); opacity: .7; }
-.field input:focus {
+.field input:focus,
+.field select:focus {
   outline: none;
   border-color: var(--purple);
   box-shadow: 0 0 0 4px rgba(var(--purple-rgb), .15);

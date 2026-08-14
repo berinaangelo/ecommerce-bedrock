@@ -7,10 +7,14 @@
  * template hierarchy applies. Line items, totals, and every mutation come
  * from the Store API via CartController; this stays a thin shell.
  *
- * No shipping line here — the Store API leaves `total_shipping` null until
- * a shipping address exists (see CartSchema::get_totals()), which is
- * Module 4's job. "Continue to Checkout" links to /checkout/ and is left
- * inert until that module exists.
+ * Shipping row: `total_shipping` is non-null as soon as a shipping method
+ * exists on a matching zone (Module 4 configured a flat-rate method on the
+ * default catch-all zone, which matches every destination) — WooCommerce
+ * defaults the customer to the store's base country/state before any address
+ * is entered, so this is populated from the very start of a cart session,
+ * not only after Module 4's address step. Falls back to '—' for the (now
+ * unlikely) case it's still null. "Continue to Checkout" links to /checkout/
+ * and is left inert until Module 4's "Place Order" exists.
  *
  * @package TailPress
  */
@@ -67,6 +71,7 @@ get_header();
 
         <div class="summary">
             <div class="summary-row"><span><?php esc_html_e('Subtotal', 'tailpress'); ?></span><span class="mono">{{ vm.cart.totals.total_items | wcPrice:vm.cart.totals }}</span></div>
+            <div class="summary-row"><span><?php esc_html_e('Shipping', 'tailpress'); ?></span><span class="mono">{{ vm.cart.totals.total_shipping == null ? '—' : (vm.cart.totals.total_shipping | wcPrice:vm.cart.totals) }}</span></div>
             <div class="summary-row total"><span><?php esc_html_e('Total', 'tailpress'); ?></span><span class="mono">{{ vm.cart.totals.total_price | wcPrice:vm.cart.totals }}</span></div>
             <a class="btn btn-dark btn-block" href="<?php echo esc_url(home_url('/checkout/')); ?>" style="margin-top:20px;"><?php esc_html_e('Continue to Checkout', 'tailpress'); ?></a>
         </div>

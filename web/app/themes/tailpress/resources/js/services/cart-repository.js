@@ -63,4 +63,37 @@ angular.module('ecommerceApp').service('CartRepository', ['$http', 'StoreApiNonc
             }
         );
     };
+
+    // Module 4: Checkout. One address for both billing and shipping — the
+    // mockup's "Contact & shipping" fieldset is a single section, no
+    // separate billing UI. Recalculates shipping_rates as a side effect.
+    this.updateCustomer = function (address) {
+        return $http.post(
+            window.ecommerceStoreApi.cartUpdateCustomerUrl,
+            { billing_address: address, shipping_address: address },
+            { headers: { 'Nonce': StoreApiNonce.current } }
+        ).then(
+            function (response) {
+                return { cart: response.data, failed: false };
+            },
+            function () {
+                return { cart: null, failed: true };
+            }
+        );
+    };
+
+    this.selectShippingRate = function (packageId, rateId) {
+        return $http.post(
+            window.ecommerceStoreApi.cartSelectShippingRateUrl,
+            { package_id: packageId, rate_id: rateId },
+            { headers: { 'Nonce': StoreApiNonce.current } }
+        ).then(
+            function (response) {
+                return { cart: response.data, failed: false };
+            },
+            function () {
+                return { cart: null, failed: true };
+            }
+        );
+    };
 }]);

@@ -219,7 +219,31 @@ info "Activating WooCommerce..."
 # regardless of theme template — not what a demo/dev site wants. Idempotent.
 "$WP_CLI" option update woocommerce_coming_soon no >/dev/null
 
-# ---------- 11. seed catalog demo products (Module 1 prerequisite) ----------
+# ---------- 11. checkout prerequisites (Module 4) ----------
+
+# Stripe is deferred to its own step (see docs/PLAN.md's build-sequence
+# decision) — WooCommerce's built-in Cash on Delivery gateway stands in as
+# the payment method until then. Idempotent.
+info "Enabling Cash on Delivery as the (temporary) payment method..."
+"$WP_CLI" wc payment_gateway update cod --user="$ADMIN_USER" --enabled=true >/dev/null
+
+# The Store API's shipping-rate selection (Module 4) has nothing to select
+# until a shipping zone has at least one method — a fresh WooCommerce install
+# has zero configured on any zone. Adding one flat rate to the default
+# catch-all zone (id 0) so every address gets a real rate back; guarded like
+# product seeding below so re-running setup doesn't create duplicates.
+EXISTING_SHIPPING_METHOD_COUNT="$("$WP_CLI" wc shipping_zone_method list 0 --user="$ADMIN_USER" --format=count)"
+if [ "$EXISTING_SHIPPING_METHOD_COUNT" -gt 0 ]; then
+    info "A shipping method already exists on the default zone — skipping."
+else
+    info "Adding a flat-rate shipping method to the default zone..."
+    "$WP_CLI" wc shipping_zone_method create 0 --user="$ADMIN_USER" \
+        --method_id="flat_rate" --enabled=true \
+        --settings='{"title":"Standard Shipping","cost":"6.00"}' \
+        >/dev/null
+fi
+
+# ---------- 12. seed catalog demo products (Module 1 prerequisite) ----------
 
 EXISTING_PRODUCT_COUNT="$("$WP_CLI" post list --post_type=product --format=count)"
 if [ "$EXISTING_PRODUCT_COUNT" -gt 0 ]; then
@@ -244,7 +268,7 @@ else
         >/dev/null
 fi
 
-# ---------- 12. summary ----------
+# ---------- 13. summary ----------
 
 echo
 info "Done. Site: ${WP_HOME}  |  Admin: ${WP_HOME}/wp/wp-admin"

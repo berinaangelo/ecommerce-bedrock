@@ -12,12 +12,11 @@
 
     <?php do_action('tailpress_content_after'); ?>
 
-    <footer id="colophon" class="bg-light/50 mt-12" role="contentinfo">
-        <div class="container mx-auto py-12">
+    <footer id="colophon" class="storefront-footer" role="contentinfo">
+        <div class="wrap">
             <?php do_action('tailpress_footer'); ?>
-            <div class="text-sm text-zinc-700">
-                &copy; <?php echo esc_html(date_i18n('Y')); ?> - <?php bloginfo('name'); ?>
-            </div>
+            <span class="eyebrow">&copy; <?php echo esc_html(date_i18n('Y')); ?> <?php bloginfo('name'); ?></span>
+            <span class="eyebrow"><?php esc_html_e('Free shipping over $100 · 30-day returns', 'tailpress'); ?></span>
         </div>
     </footer>
 </div>

@@ -1,11 +1,3 @@
-window.addEventListener('load', function () {
-    let mainNavigation = document.getElementById('primary-navigation')
-    let mainNavigationToggle = document.getElementById('primary-menu-toggle')
-
-    if(mainNavigation && mainNavigationToggle) {
-        mainNavigationToggle.addEventListener('click', function (e) {
-            e.preventDefault()
-            mainNavigation.classList.toggle('hidden')
-        })
-    }
-})
+// Theme-level (non-Angular) JS. The mobile primary-menu toggle that used to
+// live here was removed along with header.php's nav menu/search markup when
+// the storefront shell was restyled to match docs/mockups — see PLAN.md.

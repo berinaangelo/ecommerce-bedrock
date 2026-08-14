@@ -19,6 +19,9 @@ export default defineConfig(({ command }) => {
                 input: [
                     'resources/js/app.js',
                     'resources/js/angular-app.js',
+                    'resources/js/services/product-repository.js',
+                    'resources/js/services/price-formatter.js',
+                    'resources/js/controllers/catalog-controller.js',
                     'resources/css/app.css',
                     'resources/css/editor-style.css'
                 ],

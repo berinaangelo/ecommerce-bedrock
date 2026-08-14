@@ -1,0 +1,321 @@
+/*
+ * Storefront design system ("Signal"), ported from docs/mockups/*.html.
+ * Plain CSS custom properties + component classes rather than Tailwind
+ * utilities/theme.json presets — these tokens are independent of the
+ * block-editor palette in theme.json, which only affects Gutenberg content.
+ *
+ * Fonts (Anton/Manrope/JetBrains Mono) are loaded via Google Fonts, enqueued
+ * in functions.php, rather than the mockup's inline base64 @font-face blocks.
+ */
+
+:root {
+  --bg: #F2F2F2;
+  --surface: #FFFFFF;
+  --tile: #F0F0EF;
+  --ink: #131313;
+  --ink-muted: #6B6B72;
+  --border: #E3E3E6;
+  --red: #FF4D4D;
+  --yellow: #FFB800;
+  --purple: #6A4C93;
+  --purple-rgb: 106, 76, 147;
+  --red-rgb: 255, 77, 77;
+  --yellow-rgb: 255, 184, 0;
+  --shadow: 0 1px 2px rgba(19, 19, 19, .06);
+  --radius-card: 20px;
+  --radius-btn: 999px;
+  --radius-input: 12px;
+  --storefront-container: 1140px;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0E0E10;
+    --surface: #19191C;
+    --tile: #212126;
+    --ink: #F2F2F0;
+    --ink-muted: #9C9CA3;
+    --border: #2B2B30;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .5);
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: var(--storefront-container);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+@media (min-width: 900px) {
+  .wrap { padding-inline: 40px; }
+}
+
+.mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+#page h1,
+#page h2,
+#page h3,
+.display {
+  font-family: 'Anton', system-ui, sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  text-wrap: balance;
+  margin: 0;
+  line-height: .98;
+}
+
+/* Nav */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 20px;
+}
+.wordmark {
+  font-family: 'Anton', system-ui, sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .15s, color .15s, transform .15s;
+}
+.icon-btn:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+  transform: translateY(-1px);
+}
+.icon-btn svg {
+  width: 19px;
+  height: 19px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+}
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--ink);
+  color: var(--surface);
+  font-family: 'JetBrains Mono';
+  font-size: .68rem;
+  font-weight: 700;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+}
+
+/* Hero / section header */
+.thesis {
+  padding-block: 56px 40px;
+  border-bottom: 1px solid var(--border);
+}
+.thesis h1 {
+  font-size: clamp(2.4rem, 4.6vw + 1rem, 4.2rem);
+  max-width: 14ch;
+}
+.thesis p {
+  margin: 16px 0 0;
+  max-width: 46ch;
+  color: var(--ink-muted);
+  font-size: 1.05rem;
+}
+
+/* Product grid + card */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  padding-block: 32px 56px;
+}
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 22px;
+    padding-block: 40px 72px;
+  }
+}
+@media (max-width: 639px) {
+  .card-body { padding: 14px 14px 16px; }
+  .card-name { font-size: .88rem; }
+  .card-cat { font-size: .72rem; }
+  .price { font-size: .95rem; }
+  .price-was { font-size: .75rem; }
+  .badge-sale, .badge-stock { font-size: .6rem; padding: 5px 9px; top: 10px; left: 10px; }
+}
+.card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s ease, border-color .22s ease;
+}
+.card:hover {
+  transform: translateY(-6px);
+  border-color: var(--purple);
+  box-shadow: 0 16px 30px rgba(var(--purple-rgb), .2);
+}
+.card:hover .card-arrow {
+  color: var(--purple);
+  transform: translate(2px, -2px);
+}
+.tile {
+  aspect-ratio: 1;
+  background: var(--tile);
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.badge-sale,
+.badge-stock {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  font-family: 'JetBrains Mono';
+  font-weight: 700;
+  font-size: .68rem;
+  letter-spacing: .02em;
+  padding: 6px 11px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  z-index: 2;
+}
+.badge-sale { background: var(--yellow); color: #131313; }
+.badge-stock { background: var(--border); color: var(--ink-muted); }
+.card.is-soldout { opacity: .55; }
+.card-body { padding: 18px 20px 22px; }
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.card-name {
+  font-size: 1.02rem;
+  font-weight: 700;
+  font-family: 'Manrope';
+  letter-spacing: -.005em;
+}
+.card-cat {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-muted);
+  font-size: .78rem;
+}
+.card-arrow {
+  color: var(--ink-muted);
+  transition: color .18s, transform .18s;
+  flex: none;
+}
+.card-arrow svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-top: 12px;
+}
+.price {
+  font-family: 'JetBrains Mono';
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.price-was {
+  font-family: 'JetBrains Mono';
+  font-size: .85rem;
+  color: var(--ink-muted);
+  text-decoration: line-through;
+}
+
+.empty-state {
+  color: var(--ink-muted);
+  padding-block: 70px;
+  text-align: center;
+  font-size: .95rem;
+}
+
+.btn-ghost {
+  background: none;
+  border: none;
+  color: var(--ink-muted);
+  font-weight: 600;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: color .15s;
+}
+.btn-ghost:hover { color: var(--purple); }
+
+/* Footer */
+footer.storefront-footer {
+  border-top: 1px solid var(--border);
+  padding-block: 32px;
+  margin-top: auto;
+}
+footer.storefront-footer .wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+footer.storefront-footer .eyebrow { color: var(--ink-muted); }

@@ -191,6 +191,13 @@ else
         --skip-email
 fi
 
+# WooCommerce requires "pretty" permalinks (plain `?p=` URLs break the Store
+# API and the page-{slug}.php routing modules 1-5 rely on) — idempotent, so
+# safe to re-run.
+info "Setting permalink structure to /%postname%/..."
+"$WP_CLI" rewrite structure '/%postname%/' --hard
+"$WP_CLI" rewrite flush --hard
+
 # ---------- 10. build & activate theme, activate plugins ----------
 
 if [ -f web/app/themes/tailpress/composer.json ]; then
@@ -207,7 +214,37 @@ info "Activating WooCommerce..."
 "$WP_CLI" plugin activate woocommerce
 "$WP_CLI" transient delete _wc_activation_redirect >/dev/null 2>&1 || true
 
-# ---------- 11. summary ----------
+# A fresh WooCommerce install defaults the store to "Coming soon" mode, which
+# intercepts every store page (Shop/Cart/Checkout/product) with a placeholder
+# regardless of theme template — not what a demo/dev site wants. Idempotent.
+"$WP_CLI" option update woocommerce_coming_soon no >/dev/null
+
+# ---------- 11. seed catalog demo products (Module 1 prerequisite) ----------
+
+EXISTING_PRODUCT_COUNT="$("$WP_CLI" post list --post_type=product --format=count)"
+if [ "$EXISTING_PRODUCT_COUNT" -gt 0 ]; then
+    info "Products already exist ($EXISTING_PRODUCT_COUNT) — skipping demo product seeding."
+else
+    info "Seeding demo products for the catalog..."
+    "$WP_CLI" wc product create --user="$ADMIN_USER" \
+        --name="Pulse Wireless Earbuds" \
+        --regular_price="119.00" --sale_price="89.00" \
+        --images='[{"src":"https://placehold.co/800x800.jpg?text=Pulse+Earbuds"}]' \
+        >/dev/null
+    "$WP_CLI" wc product create --user="$ADMIN_USER" \
+        --name="Nomad Backpack 22L" \
+        --regular_price="128.00" \
+        --images='[{"src":"https://placehold.co/800x800.jpg?text=Nomad+Backpack"}]' \
+        >/dev/null
+    "$WP_CLI" wc product create --user="$ADMIN_USER" \
+        --name="Aero Fast Charger 65W" \
+        --regular_price="49.00" \
+        --in_stock="false" \
+        --images='[{"src":"https://placehold.co/800x800.jpg?text=Aero+Charger"}]' \
+        >/dev/null
+fi
+
+# ---------- 12. summary ----------
 
 echo
 info "Done. Site: ${WP_HOME}  |  Admin: ${WP_HOME}/wp/wp-admin"

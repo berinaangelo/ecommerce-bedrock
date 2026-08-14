@@ -14,64 +14,27 @@
     <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>">
     <?php wp_head(); ?>
 </head>
-<body <?php body_class('bg-white text-zinc-900 antialiased'); ?>>
+<body <?php body_class('antialiased'); ?>>
 <?php do_action('tailpress_site_before'); ?>
 
 <div id="page" class="min-h-screen flex flex-col">
     <?php do_action('tailpress_header'); ?>
 
-    <header class="container mx-auto py-6">
-        <div class="md:flex md:justify-between md:items-center">
-            <div class="flex justify-between items-center">
-                <div>
-                    <?php if (has_custom_logo()): ?>
-                        <?php the_custom_logo(); ?>
-                    <?php else: ?>
-                        <div class="flex items-center gap-2">
-                            <a href="<?php echo esc_url(home_url('/')); ?>" class="!no-underline lowercase font-medium text-lg">
-                                <?php bloginfo('name'); ?>
-                            </a>
-                            <?php if ($description = get_bloginfo('description')): ?>
-                                <span class="text-sm font-light text-dark/80">|</span>
-                                <span class="text-sm font-light text-dark/80"><?php echo esc_html($description); ?></span>
-                            <?php endif; ?>
-                        </div>
+    <nav class="nav">
+        <div class="wrap nav-inner">
+            <a class="wordmark" href="<?php echo esc_url(home_url('/')); ?>"><?php bloginfo('name'); ?></a>
+            <div class="nav-right">
+                <?php // Cart count isn't wired up yet — that's Module 3 (Cart). The badge only renders once there's a real count to show.?>
+                <?php $cart_count = 0; ?>
+                <a class="icon-btn" href="<?php echo esc_url(home_url('/cart/')); ?>" aria-label="<?php echo $cart_count > 0 ? esc_attr(sprintf(__('Cart, %d items', 'tailpress'), $cart_count)) : esc_attr__('View cart', 'tailpress'); ?>">
+                    <svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L21.6 8H6"/><circle cx="9.5" cy="20.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="17.5" cy="20.5" r="1.4" fill="currentColor" stroke="none"/></svg>
+                    <?php if ($cart_count > 0): ?>
+                        <span class="cart-badge"><?php echo esc_html($cart_count); ?></span>
                     <?php endif; ?>
-                </div>
-
-                <?php if (has_nav_menu('primary')): ?>
-                    <div class="md:hidden">
-                        <button type="button" aria-label="Toggle navigation" id="primary-menu-toggle">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                            </svg>
-                        </button>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <div id="primary-navigation" class="hidden md:flex md:bg-transparent gap-6 items-center border border-light md:border-none rounded-xl p-4 md:p-0">
-                <nav>
-                    <?php if (current_user_can('administrator') && !has_nav_menu('primary')): ?>
-                        <a href="<?php echo esc_url(admin_url('nav-menus.php')); ?>" class="text-sm text-zinc-600"><?php esc_html_e('Edit Menus', 'tailpress'); ?></a>
-                    <?php else: ?>
-                        <?php
-                        wp_nav_menu([
-                            'container_id'    => 'primary-menu',
-                            'container_class' => '',
-                            'menu_class'      => 'md:flex md:-mx-4 [&_a]:!no-underline',
-                            'theme_location'  => 'primary',
-                            'li_class'        => 'md:mx-4',
-                            'fallback_cb'     => false,
-                        ]);
-                        ?>
-                    <?php endif; ?>
-                </nav>
-
-                <div class="inline-block mt-4 md:mt-0"><?php get_search_form(); ?></div>
+                </a>
             </div>
         </div>
-    </header>
+    </nav>
 
     <div id="content" class="site-content grow">
         <?php if (is_front_page()): ?>
